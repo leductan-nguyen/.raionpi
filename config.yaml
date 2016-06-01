@@ -1,0 +1,9 @@
+api:
+  key: 069846F4A00F4245997FB66477B80BF9
+plugins:
+  discovery:
+    upnpUuid: 8c8ea64b-1dae-4c00-bb2f-276799939b7d
+  softwareupdate:
+    _config_version: 4
+server:
+  secretKey: OaoPfPPK5VZJszI1K9OnBaWjx96xoqVX

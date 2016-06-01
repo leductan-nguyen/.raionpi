@@ -1,0 +1,27 @@
+__version: 1.2.11.post23+g6f4ebff
+octoprint:
+  available: false
+  hash: d293ef8a58c2a43facb774c43fdb93b8
+  information:
+    local:
+      name: 1.2.11.post23+g6f4ebff
+      value: 1.2.11.post23+g6f4ebff
+    remote:
+      name: 1.2.11 (stable)
+      release_notes: https://github.com/foosel/OctoPrint/releases/tag/1.2.11
+      value: 1.2.11
+  possible: false
+  timestamp: 1464785832.75029
+touchui:
+  available: false
+  hash: 839207edf9d1f67b8febf67a740b16ba
+  information:
+    local:
+      name: 0.3.3
+      value: 0.3.3
+    remote:
+      name: 0.3.3
+      release_notes: https://github.com/BillyBlaze/OctoPrint-TouchUI/releases/tag/0.3.3
+      value: 0.3.3
+  possible: true
+  timestamp: 1464785832.029154
