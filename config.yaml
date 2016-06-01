@@ -5,12 +5,15 @@ appearance:
 feature: {}
 gcodeViewer: {}
 plugins:
+  cura:
+    cura_engine: /home/pi/CuraEngine/build/CuraEngine
   discovery:
     upnpUuid: 8c8ea64b-1dae-4c00-bb2f-276799939b7d
   softwareupdate:
     _config_version: 4
     checks:
       octoprint:
+        checkout_folder: null
         type: github_release
   touchui:
     hasCustom: false
