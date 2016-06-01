@@ -55,13 +55,22 @@ printerProfiles:
 serial:
   port: AUTO
   timeout: {}
-  autoconnect: true
 server:
+  host: 127.0.0.1
   commands: {}
   secretKey: OaoPfPPK5VZJszI1K9OnBaWjx96xoqVX
-system: {}
+system:
+  actions:
+  - action: shutdown
+    command: sudo shutdown -h now
+    confirm: You are about to shutdown the system.
+    name: Shutdown
+  - action: reboot
+    command: sudo shutdown -r now
+    confirm: You are about to reboot the system
+    name: Reboot
 temperature: {}
 webcam:
   ffmpeg: /usr/bin/avconv
   snapshot: http://127.0.0.1:8080/?action=snapshot
-  stream: http://192.168.0.23:8080/?action=stream
+  stream: http://webcam/?action=stream

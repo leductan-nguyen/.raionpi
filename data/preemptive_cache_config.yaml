@@ -1,11 +1,16 @@
 /:
-- _count: 20
-  _timestamp: 1464796731.340562
+- _count: 3
+  _timestamp: 1464801724.195241
+  base_url: http://192.168.0.23/
+  path: /
+  query_string: l10n=en
+- _count: 26
+  _timestamp: 1464801644.594002
   base_url: http://192.168.0.23:5000/
   path: /
   query_string: l10n=en
-- _count: 1
-  _timestamp: 1464787090.140247
+- _count: 2
+  _timestamp: 1464799704.099039
   base_url: http://raionpi3.local:5000/
   path: /
   query_string: l10n=en
