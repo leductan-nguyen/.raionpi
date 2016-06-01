@@ -55,6 +55,7 @@ printerProfiles:
 serial:
   port: AUTO
   timeout: {}
+  autoconnect: true
 server:
   commands: {}
   secretKey: OaoPfPPK5VZJszI1K9OnBaWjx96xoqVX
