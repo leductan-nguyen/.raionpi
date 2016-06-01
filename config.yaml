@@ -1,9 +1,63 @@
 api:
   key: 069846F4A00F4245997FB66477B80BF9
+appearance:
+  defaultLanguage: en
+feature: {}
+gcodeViewer: {}
 plugins:
   discovery:
     upnpUuid: 8c8ea64b-1dae-4c00-bb2f-276799939b7d
   softwareupdate:
     _config_version: 4
+    checks:
+      octoprint:
+        type: github_release
+  touchui:
+    hasCustom: false
+    refreshCSS: false
+    requireNewCSS: false
+    whatsNew: false
+printerParameters: {}
+printerProfiles:
+  defaultProfile:
+    axes:
+      e:
+        inverted: false
+        speed: 300
+      x:
+        inverted: false
+        speed: 6000
+      y:
+        inverted: false
+        speed: 6000
+      z:
+        inverted: true
+        speed: 200
+    color: default
+    extruder:
+      count: 1
+      nozzleDiameter: 0.4
+      offsets:
+      - - 0.0
+        - 0.0
+    heatedBed: true
+    id: _default
+    model: Generic RepRap Printer
+    name: Default
+    volume:
+      depth: 215.0
+      formFactor: rectangular
+      height: 193.0
+      origin: lowerleft
+      width: 215.0
+serial:
+  timeout: {}
 server:
+  commands: {}
   secretKey: OaoPfPPK5VZJszI1K9OnBaWjx96xoqVX
+system: {}
+temperature: {}
+webcam:
+  ffmpeg: /usr/bin/avconv
+  snapshot: http://127.0.0.1:8080/?action=snapshot
+  stream: http://192.168.0.23:8080/?action=stream
