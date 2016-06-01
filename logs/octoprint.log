@@ -618,3 +618,767 @@ Traceback (most recent call last):
   File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post25.dev0_g16853b2-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
     for key, config in configs.items():
 AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:31:07,501 - octoprint.server - INFO - Shutting down...
+2016-06-01 17:31:07,714 - octoprint.server - INFO - Goodbye!
+2016-06-01 17:31:08,426 - octoprint.server - INFO - Starting RaionPi 1.2.11.post26.dev0+g145e4f4 (master branch)
+2016-06-01 17:31:08,467 - octoprint.plugin.core - INFO - Loading plugins from /home/pi/.raionpi/plugins, /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins and installed plugin packages...
+2016-06-01 17:31:09,386 - octoprint.plugins.discovery - INFO - pybonjour is not installed, Zeroconf Discovery won't be available
+2016-06-01 17:31:09,387 - octoprint.plugin.core - INFO - Found 7 plugin(s) providing 7 mixin implementations, 5 hook handlers
+2016-06-01 17:31:09,395 - octoprint.filemanager.storage - INFO - Initializing the file metadata for /home/pi/.raionpi/uploads...
+2016-06-01 17:31:09,396 - octoprint.filemanager.storage - INFO - ... file metadata for /home/pi/.raionpi/uploads initialized successfully.
+2016-06-01 17:31:09,454 - octoprint.plugins.softwareupdate - INFO - Version cache was created for another version of RaionPi, not using it
+2016-06-01 17:31:12,259 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:31:12,262 - octoprint.plugin.core - INFO - Initialized 7 plugin implementation(s)
+2016-06-01 17:31:12,444 - octoprint.plugin.core - INFO - 7 plugin(s) registered with the system:
+|  Announcement Plugin (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements
+|  CuraEngine (<= 15.04) (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/cura
+|  Discovery (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/discovery
+|  Plugin Manager (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/pluginmanager
+|  Software Update (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/softwareupdate
+|  TouchUIPP (0.3.3) = /home/pi/RaionPi/venv/local/lib/python2.7/site-packages/octoprint_touchui
+|  Virtual Printer (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/virtual_printer
+2016-06-01 17:31:12,446 - octoprint.filemanager - INFO - Adding backlog items from all storage types to analysis queue...
+2016-06-01 17:31:12,455 - octoprint.filemanager - INFO - Added 0 items from storage type "local" to analysis queue
+2016-06-01 17:31:12,461 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/webassets...
+2016-06-01 17:31:12,477 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/.webassets-cache...
+2016-06-01 17:31:13,137 - octoprint.plugins.pluginmanager - INFO - Loaded plugin repository data from disk, was still valid
+2016-06-01 17:31:13,171 - octoprint.server - INFO - Listening on http://0.0.0.0:5000
+2016-06-01 17:31:13,173 - octoprint.plugins.discovery - INFO - Registered RaionPi instance on raionpi3 for SSDP
+2016-06-01 17:31:13,195 - octoprint.plugin - ERROR - Error while calling plugin announcements
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugin/__init__.py", line 204, in call_plugin
+    result = getattr(plugin, method)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 42, in on_after_startup
+    self._fetch_all_channels()
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:31:13,269 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://192.168.0.23:5000/'}
+2016-06-01 17:31:13,414 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:31:17,981 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:31:20,541 - octoprint.plugins.softwareupdate - INFO - Saved version cache to disk
+2016-06-01 17:31:20,574 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:31:20,860 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.23
+2016-06-01 17:31:21,233 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:31:22,596 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://raionpi3.local:5000/'}
+2016-06-01 17:31:22,962 - octoprint.server.util.sockjs - INFO - Client connection closed: 192.168.0.20
+2016-06-01 17:31:39,278 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:31:39,709 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:36:33,917 - octoprint.server.util.sockjs - INFO - Client connection closed: 192.168.0.20
+2016-06-01 17:36:34,836 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:36:35,352 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post26.dev0_g145e4f4-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:40:18,128 - octoprint.server - INFO - Shutting down...
+2016-06-01 17:40:18,594 - octoprint.server - INFO - Goodbye!
+2016-06-01 17:40:19,287 - octoprint.server - INFO - Starting RaionPi 1.2.11.post27.dev0+gf6ec4f0 (master branch)
+2016-06-01 17:40:19,337 - octoprint.plugin.core - INFO - Loading plugins from /home/pi/.raionpi/plugins, /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins and installed plugin packages...
+2016-06-01 17:40:20,283 - octoprint.plugins.discovery - INFO - pybonjour is not installed, Zeroconf Discovery won't be available
+2016-06-01 17:40:20,285 - octoprint.plugin.core - INFO - Found 7 plugin(s) providing 7 mixin implementations, 5 hook handlers
+2016-06-01 17:40:20,295 - octoprint.filemanager.storage - INFO - Initializing the file metadata for /home/pi/.raionpi/uploads...
+2016-06-01 17:40:20,296 - octoprint.filemanager.storage - INFO - ... file metadata for /home/pi/.raionpi/uploads initialized successfully.
+2016-06-01 17:40:20,353 - octoprint.plugins.softwareupdate - INFO - Version cache was created for another version of RaionPi, not using it
+2016-06-01 17:40:23,203 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:40:23,206 - octoprint.plugin.core - INFO - Initialized 7 plugin implementation(s)
+2016-06-01 17:40:23,377 - octoprint.plugin.core - INFO - 7 plugin(s) registered with the system:
+|  Announcement Plugin (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/announcements
+|  CuraEngine (<= 15.04) (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/cura
+|  Discovery (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/discovery
+|  Plugin Manager (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/pluginmanager
+|  Software Update (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/softwareupdate
+|  TouchUIPP (0.3.3) = /home/pi/RaionPi/venv/local/lib/python2.7/site-packages/octoprint_touchui
+|  Virtual Printer (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/virtual_printer
+2016-06-01 17:40:23,379 - octoprint.filemanager - INFO - Adding backlog items from all storage types to analysis queue...
+2016-06-01 17:40:23,387 - octoprint.filemanager - INFO - Added 0 items from storage type "local" to analysis queue
+2016-06-01 17:40:23,391 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/webassets...
+2016-06-01 17:40:23,407 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/.webassets-cache...
+2016-06-01 17:40:24,326 - octoprint.plugins.discovery - INFO - Registered RaionPi instance on raionpi3 for SSDP
+2016-06-01 17:40:24,340 - octoprint.plugins.pluginmanager - INFO - Loaded plugin repository data from disk, was still valid
+2016-06-01 17:40:24,363 - octoprint.server - INFO - Listening on http://0.0.0.0:5000
+2016-06-01 17:40:24,385 - octoprint.plugin - ERROR - Error while calling plugin announcements
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugin/__init__.py", line 204, in call_plugin
+    result = getattr(plugin, method)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 42, in on_after_startup
+    self._fetch_all_channels()
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:40:24,431 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://192.168.0.23:5000/'}
+2016-06-01 17:40:26,262 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.23
+2016-06-01 17:40:27,282 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:40:32,226 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:40:33,246 - octoprint.plugins.softwareupdate - INFO - Saved version cache to disk
+2016-06-01 17:40:33,341 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:40:34,083 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://raionpi3.local:5000/'}
+2016-06-01 17:40:34,408 - octoprint.server.util.sockjs - INFO - Client connection closed: 192.168.0.20
+2016-06-01 17:40:38,444 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:40:38,504 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post27.dev0_gf6ec4f0-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:43:56,152 - octoprint.server - INFO - Shutting down...
+2016-06-01 17:43:57,147 - octoprint.server - INFO - Goodbye!
+2016-06-01 17:43:57,757 - octoprint.server - INFO - Starting RaionPi 1.2.11.post28.dev0+g2181019 (master branch)
+2016-06-01 17:43:57,795 - octoprint.plugin.core - INFO - Loading plugins from /home/pi/.raionpi/plugins, /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins and installed plugin packages...
+2016-06-01 17:43:58,651 - octoprint.plugins.discovery - INFO - pybonjour is not installed, Zeroconf Discovery won't be available
+2016-06-01 17:43:58,652 - octoprint.plugin.core - INFO - Found 7 plugin(s) providing 7 mixin implementations, 5 hook handlers
+2016-06-01 17:43:58,660 - octoprint.filemanager.storage - INFO - Initializing the file metadata for /home/pi/.raionpi/uploads...
+2016-06-01 17:43:58,661 - octoprint.filemanager.storage - INFO - ... file metadata for /home/pi/.raionpi/uploads initialized successfully.
+2016-06-01 17:43:58,716 - octoprint.plugins.softwareupdate - INFO - Version cache was created for another version of RaionPi, not using it
+2016-06-01 17:44:01,361 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:44:01,368 - octoprint.plugin.core - INFO - Initialized 7 plugin implementation(s)
+2016-06-01 17:44:01,374 - octoprint.plugin.core - INFO - 7 plugin(s) registered with the system:
+|  Announcement Plugin (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/announcements
+|  CuraEngine (<= 15.04) (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/cura
+|  Discovery (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/discovery
+|  Plugin Manager (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/pluginmanager
+|  Software Update (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/softwareupdate
+|  TouchUIPP (0.3.3) = /home/pi/RaionPi/venv/local/lib/python2.7/site-packages/octoprint_touchui
+|  Virtual Printer (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/virtual_printer
+2016-06-01 17:44:01,381 - octoprint.filemanager - INFO - Adding backlog items from all storage types to analysis queue...
+2016-06-01 17:44:01,384 - octoprint.filemanager - INFO - Added 0 items from storage type "local" to analysis queue
+2016-06-01 17:44:01,388 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/webassets...
+2016-06-01 17:44:01,403 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/.webassets-cache...
+2016-06-01 17:44:02,263 - octoprint.plugins.pluginmanager - INFO - Loaded plugin repository data from disk, was still valid
+2016-06-01 17:44:02,289 - octoprint.server - INFO - Listening on http://0.0.0.0:5000
+2016-06-01 17:44:02,290 - octoprint.plugins.discovery - INFO - Registered RaionPi instance on raionpi3 for SSDP
+2016-06-01 17:44:02,312 - octoprint.plugin - ERROR - Error while calling plugin announcements
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugin/__init__.py", line 204, in call_plugin
+    result = getattr(plugin, method)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 42, in on_after_startup
+    self._fetch_all_channels()
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:44:02,359 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://192.168.0.23:5000/'}
+2016-06-01 17:44:05,417 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.23
+2016-06-01 17:44:05,625 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:44:10,615 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://raionpi3.local:5000/'}
+2016-06-01 17:44:14,808 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:44:15,532 - octoprint.plugins.softwareupdate - INFO - Saved version cache to disk
+2016-06-01 17:44:15,608 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:44:15,684 - octoprint.server.util.sockjs - INFO - Client connection closed: 192.168.0.20
+2016-06-01 17:44:17,813 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:44:18,200 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post28.dev0_g2181019-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:47:12,251 - octoprint.server - INFO - Shutting down...
+2016-06-01 17:47:12,941 - octoprint.server - INFO - Goodbye!
+2016-06-01 17:47:13,541 - octoprint.server - INFO - Starting RaionPi 1.2.11.post29.dev0+g1eeeac9 (master branch)
+2016-06-01 17:47:13,580 - octoprint.plugin.core - INFO - Loading plugins from /home/pi/.raionpi/plugins, /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins and installed plugin packages...
+2016-06-01 17:47:14,478 - octoprint.plugins.discovery - INFO - pybonjour is not installed, Zeroconf Discovery won't be available
+2016-06-01 17:47:14,480 - octoprint.plugin.core - INFO - Found 7 plugin(s) providing 7 mixin implementations, 5 hook handlers
+2016-06-01 17:47:14,488 - octoprint.filemanager.storage - INFO - Initializing the file metadata for /home/pi/.raionpi/uploads...
+2016-06-01 17:47:14,490 - octoprint.filemanager.storage - INFO - ... file metadata for /home/pi/.raionpi/uploads initialized successfully.
+2016-06-01 17:47:14,548 - octoprint.plugins.softwareupdate - INFO - Version cache was created for another version of RaionPi, not using it
+2016-06-01 17:47:17,369 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:47:17,372 - octoprint.plugin.core - INFO - Initialized 7 plugin implementation(s)
+2016-06-01 17:47:17,378 - octoprint.plugin.core - INFO - 7 plugin(s) registered with the system:
+|  Announcement Plugin (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements
+|  CuraEngine (<= 15.04) (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/cura
+|  Discovery (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/discovery
+|  Plugin Manager (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/pluginmanager
+|  Software Update (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/softwareupdate
+|  TouchUIPP (0.3.3) = /home/pi/RaionPi/venv/local/lib/python2.7/site-packages/octoprint_touchui
+|  Virtual Printer (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/virtual_printer
+2016-06-01 17:47:17,379 - octoprint.filemanager - INFO - Adding backlog items from all storage types to analysis queue...
+2016-06-01 17:47:17,388 - octoprint.filemanager - INFO - Added 0 items from storage type "local" to analysis queue
+2016-06-01 17:47:17,392 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/webassets...
+2016-06-01 17:47:17,408 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/.webassets-cache...
+2016-06-01 17:47:18,035 - octoprint.plugins.pluginmanager - INFO - Loaded plugin repository data from disk, was still valid
+2016-06-01 17:47:18,061 - octoprint.server - INFO - Listening on http://0.0.0.0:5000
+2016-06-01 17:47:18,062 - octoprint.plugins.discovery - INFO - Registered RaionPi instance on raionpi3 for SSDP
+2016-06-01 17:47:18,096 - octoprint.plugin - ERROR - Error while calling plugin announcements
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugin/__init__.py", line 204, in call_plugin
+    result = getattr(plugin, method)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 42, in on_after_startup
+    self._fetch_all_channels()
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:47:18,110 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:47:18,224 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://192.168.0.23:5000/'}
+2016-06-01 17:47:18,432 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:47:22,329 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:47:24,089 - octoprint.plugins.softwareupdate - INFO - Saved version cache to disk
+2016-06-01 17:47:27,629 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://raionpi3.local:5000/'}
+2016-06-01 17:47:27,956 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.23
+2016-06-01 17:47:28,147 - octoprint.server.util.sockjs - INFO - Client connection closed: 192.168.0.20
+2016-06-01 17:47:29,500 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:47:32,693 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:47:32,783 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post29.dev0_g1eeeac9-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:50:10,301 - octoprint.server - INFO - Shutting down...
+2016-06-01 17:50:10,406 - octoprint.server - INFO - Goodbye!
+2016-06-01 17:50:11,068 - octoprint.server - INFO - Starting RaionPi 1.2.11.post30.dev0+g305217a (master branch)
+2016-06-01 17:50:11,106 - octoprint.plugin.core - INFO - Loading plugins from /home/pi/.raionpi/plugins, /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins and installed plugin packages...
+2016-06-01 17:50:11,958 - octoprint.plugins.discovery - INFO - pybonjour is not installed, Zeroconf Discovery won't be available
+2016-06-01 17:50:11,960 - octoprint.plugin.core - INFO - Found 7 plugin(s) providing 7 mixin implementations, 5 hook handlers
+2016-06-01 17:50:11,968 - octoprint.filemanager.storage - INFO - Initializing the file metadata for /home/pi/.raionpi/uploads...
+2016-06-01 17:50:11,969 - octoprint.filemanager.storage - INFO - ... file metadata for /home/pi/.raionpi/uploads initialized successfully.
+2016-06-01 17:50:12,024 - octoprint.plugins.softwareupdate - INFO - Version cache was created for another version of RaionPi, not using it
+2016-06-01 17:50:14,681 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:50:14,685 - octoprint.plugin.core - INFO - Initialized 7 plugin implementation(s)
+2016-06-01 17:50:14,690 - octoprint.plugin.core - INFO - 7 plugin(s) registered with the system:
+|  Announcement Plugin (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/announcements
+|  CuraEngine (<= 15.04) (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/cura
+|  Discovery (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/discovery
+|  Plugin Manager (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/pluginmanager
+|  Software Update (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/softwareupdate
+|  TouchUIPP (0.3.3) = /home/pi/RaionPi/venv/local/lib/python2.7/site-packages/octoprint_touchui
+|  Virtual Printer (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/virtual_printer
+2016-06-01 17:50:14,692 - octoprint.filemanager - INFO - Adding backlog items from all storage types to analysis queue...
+2016-06-01 17:50:14,700 - octoprint.filemanager - INFO - Added 0 items from storage type "local" to analysis queue
+2016-06-01 17:50:14,704 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/webassets...
+2016-06-01 17:50:14,719 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/.webassets-cache...
+2016-06-01 17:50:15,560 - octoprint.plugins.discovery - INFO - Registered RaionPi instance on raionpi3 for SSDP
+2016-06-01 17:50:15,589 - octoprint.plugins.pluginmanager - INFO - Loaded plugin repository data from disk, was still valid
+2016-06-01 17:50:15,613 - octoprint.server - INFO - Listening on http://0.0.0.0:5000
+2016-06-01 17:50:15,616 - octoprint.plugin - ERROR - Error while calling plugin announcements
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugin/__init__.py", line 204, in call_plugin
+    result = getattr(plugin, method)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 42, in on_after_startup
+    self._fetch_all_channels()
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:50:15,664 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://192.168.0.23:5000/'}
+2016-06-01 17:50:15,752 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:50:19,238 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:50:21,426 - octoprint.plugins.softwareupdate - INFO - Saved version cache to disk
+2016-06-01 17:50:21,574 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:50:25,442 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://raionpi3.local:5000/'}
+2016-06-01 17:50:25,799 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.23
+2016-06-01 17:50:26,022 - octoprint.server.util.sockjs - INFO - Client connection closed: 192.168.0.20
+2016-06-01 17:50:26,087 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post30.dev0_g305217a-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:52:09,276 - octoprint.server - INFO - Shutting down...
+2016-06-01 17:52:09,526 - octoprint.server - INFO - Goodbye!
+2016-06-01 17:52:10,148 - octoprint.server - INFO - Starting RaionPi 1.2.11.post31.dev0+gd88c530 (master branch)
+2016-06-01 17:52:10,187 - octoprint.plugin.core - INFO - Loading plugins from /home/pi/.raionpi/plugins, /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins and installed plugin packages...
+2016-06-01 17:52:11,073 - octoprint.plugins.discovery - INFO - pybonjour is not installed, Zeroconf Discovery won't be available
+2016-06-01 17:52:11,074 - octoprint.plugin.core - INFO - Found 7 plugin(s) providing 7 mixin implementations, 5 hook handlers
+2016-06-01 17:52:11,082 - octoprint.filemanager.storage - INFO - Initializing the file metadata for /home/pi/.raionpi/uploads...
+2016-06-01 17:52:11,084 - octoprint.filemanager.storage - INFO - ... file metadata for /home/pi/.raionpi/uploads initialized successfully.
+2016-06-01 17:52:11,140 - octoprint.plugins.softwareupdate - INFO - Version cache was created for another version of RaionPi, not using it
+2016-06-01 17:52:13,962 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:52:13,965 - octoprint.plugin.core - INFO - Initialized 7 plugin implementation(s)
+2016-06-01 17:52:13,971 - octoprint.plugin.core - INFO - 7 plugin(s) registered with the system:
+|  Announcement Plugin (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/announcements
+|  CuraEngine (<= 15.04) (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/cura
+|  Discovery (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/discovery
+|  Plugin Manager (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/pluginmanager
+|  Software Update (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/softwareupdate
+|  TouchUIPP (0.3.3) = /home/pi/RaionPi/venv/local/lib/python2.7/site-packages/octoprint_touchui
+|  Virtual Printer (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/virtual_printer
+2016-06-01 17:52:13,978 - octoprint.filemanager - INFO - Adding backlog items from all storage types to analysis queue...
+2016-06-01 17:52:13,980 - octoprint.filemanager - INFO - Added 0 items from storage type "local" to analysis queue
+2016-06-01 17:52:13,984 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/webassets...
+2016-06-01 17:52:14,000 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/.webassets-cache...
+2016-06-01 17:52:14,917 - octoprint.plugins.pluginmanager - INFO - Loaded plugin repository data from disk, was still valid
+2016-06-01 17:52:14,945 - octoprint.plugins.discovery - INFO - Registered RaionPi instance on raionpi3 for SSDP
+2016-06-01 17:52:14,947 - octoprint.server - INFO - Listening on http://0.0.0.0:5000
+2016-06-01 17:52:14,969 - octoprint.plugin - ERROR - Error while calling plugin announcements
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugin/__init__.py", line 204, in call_plugin
+    result = getattr(plugin, method)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 42, in on_after_startup
+    self._fetch_all_channels()
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:52:15,019 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://192.168.0.23:5000/'}
+2016-06-01 17:52:16,890 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.23
+2016-06-01 17:52:17,409 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:52:21,709 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:52:22,792 - octoprint.plugins.softwareupdate - INFO - Saved version cache to disk
+2016-06-01 17:52:24,130 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://raionpi3.local:5000/'}
+2016-06-01 17:52:45,017 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:52:45,098 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post31.dev0_gd88c530-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:57:57,042 - octoprint.server - INFO - Shutting down...
+2016-06-01 17:57:57,402 - octoprint.server - INFO - Goodbye!
+2016-06-01 17:57:58,111 - octoprint.server - INFO - Starting RaionPi 1.2.11.post32.dev0+g00e0360 (master branch)
+2016-06-01 17:57:58,163 - octoprint.plugin.core - INFO - Loading plugins from /home/pi/.raionpi/plugins, /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins and installed plugin packages...
+2016-06-01 17:57:59,244 - octoprint.plugins.discovery - INFO - pybonjour is not installed, Zeroconf Discovery won't be available
+2016-06-01 17:57:59,246 - octoprint.plugin.core - INFO - Found 7 plugin(s) providing 7 mixin implementations, 5 hook handlers
+2016-06-01 17:57:59,256 - octoprint.filemanager.storage - INFO - Initializing the file metadata for /home/pi/.raionpi/uploads...
+2016-06-01 17:57:59,257 - octoprint.filemanager.storage - INFO - ... file metadata for /home/pi/.raionpi/uploads initialized successfully.
+2016-06-01 17:57:59,323 - octoprint.plugins.softwareupdate - INFO - Version cache was created for another version of RaionPi, not using it
+2016-06-01 17:58:02,155 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:58:02,158 - octoprint.plugin.core - INFO - Initialized 7 plugin implementation(s)
+2016-06-01 17:58:02,164 - octoprint.plugin.core - INFO - 7 plugin(s) registered with the system:
+|  Announcement Plugin (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements
+|  CuraEngine (<= 15.04) (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/cura
+|  Discovery (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/discovery
+|  Plugin Manager (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/pluginmanager
+|  Software Update (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/softwareupdate
+|  TouchUIPP (0.3.3) = /home/pi/RaionPi/venv/local/lib/python2.7/site-packages/octoprint_touchui
+|  Virtual Printer (bundled) = /home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/virtual_printer
+2016-06-01 17:58:02,165 - octoprint.filemanager - INFO - Adding backlog items from all storage types to analysis queue...
+2016-06-01 17:58:02,174 - octoprint.filemanager - INFO - Added 0 items from storage type "local" to analysis queue
+2016-06-01 17:58:02,178 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/webassets...
+2016-06-01 17:58:02,194 - octoprint.server - INFO - Reset webasset folder /home/pi/.raionpi/generated/.webassets-cache...
+2016-06-01 17:58:02,690 - octoprint.plugins.discovery - INFO - Registered RaionPi instance on raionpi3 for SSDP
+2016-06-01 17:58:02,718 - octoprint.plugins.pluginmanager - INFO - Loaded plugin repository data from disk, was still valid
+2016-06-01 17:58:02,743 - octoprint.server - INFO - Listening on http://0.0.0.0:5000
+2016-06-01 17:58:02,746 - octoprint.plugin - ERROR - Error while calling plugin announcements
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugin/__init__.py", line 204, in call_plugin
+    result = getattr(plugin, method)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 42, in on_after_startup
+    self._fetch_all_channels()
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:58:02,793 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://192.168.0.23:5000/'}
+2016-06-01 17:58:03,261 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:58:08,696 - octoprint.util.pip - INFO - Found pip at /home/pi/RaionPi/venv/bin/pip, version is 8.1.2
+2016-06-01 17:58:10,434 - octoprint.plugins.softwareupdate - INFO - Saved version cache to disk
+2016-06-01 17:58:10,466 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:58:10,665 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.23
+2016-06-01 17:58:11,707 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
+2016-06-01 17:58:12,619 - octoprint.server - INFO - Preemptively caching / for {'query_string': 'l10n=en', 'path': '/', 'base_url': 'http://raionpi3.local:5000/'}
+2016-06-01 17:58:51,515 - octoprint.server.util.sockjs - INFO - Client connection closed: 192.168.0.20
+2016-06-01 17:58:54,581 - octoprint.server.util.sockjs - INFO - New connection from client: 192.168.0.20
+2016-06-01 17:58:54,911 - octoprint - ERROR - Exception on /plugin/announcements/channels [GET]
+Traceback (most recent call last):
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask-0.10.1-py2.7.egg/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/server/util/flask.py", line 709, in decorated_view
+    return flask.ext.login.login_required(func)(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Login-0.2.2-py2.7.egg/flask_login.py", line 637, in decorated_view
+    return func(*args, **kwargs)
+  File "/home/pi/RaionPi/venv/local/lib/python2.7/site-packages/Flask_Principal-0.3.5-py2.7.egg/flask_principal/__init__.py", line 198, in _decorated
+    rv = f(*args, **kw)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 105, in get_channel_data
+    channel_data = self._fetch_all_channels(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 208, in _fetch_all_channels
+    channels = self._get_channel_configs(force=force)
+  File "/home/pi/RaionPi/venv/lib/python2.7/site-packages/OctoPrint-1.2.11.post32.dev0_g00e0360-py2.7.egg/octoprint/plugins/announcements/__init__.py", line 191, in _get_channel_configs
+    for key, config in configs.items():
+AttributeError: 'NoneType' object has no attribute 'items'
