@@ -1,0 +1,28 @@
+case_pi_5inch.gcode:
+  analysis:
+    estimatedPrintTime: 11343.67967506704
+    filament:
+      tool0:
+        length: 14904.399090000506
+        volume: 35.03455121301701
+  hash: cd6d5cffc4ccbee7407b40ed7bded193395c3fa9
+  links: []
+cover_case_pi_5inch.gcode:
+  analysis:
+    estimatedPrintTime: 8895.346982998944
+    filament:
+      tool0:
+        length: 8732.854149999976
+        volume: 20.52760558184784
+  hash: f100517dfc82bb1be2c1afd19ea55302cfc3cb3d
+  history:
+  - printTime: 8366.84487605095
+    printerProfile: _default
+    success: true
+    timestamp: 1464879711.472711
+  links: []
+  statistics:
+    averagePrintTime:
+      _default: 8366.84487605095
+    lastPrintTime:
+      _default: 8366.84487605095

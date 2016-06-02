@@ -4775,515 +4775,6 @@ $(function() {
 
 ;
 
-$(function() {
-    function SoftwareUpdateViewModel(parameters) {
-        var self = this;
-
-        self.loginState = parameters[0];
-        self.printerState = parameters[1];
-        self.settings = parameters[2];
-        self.popup = undefined;
-
-        self.forceUpdate = false;
-
-        self.updateInProgress = false;
-        self.waitingForRestart = false;
-        self.restartTimeout = undefined;
-
-        self.currentlyBeingUpdated = [];
-
-        self.octoprintUnconfigured = ko.observable();
-        self.octoprintUnreleased = ko.observable();
-
-        self.config_cacheTtl = ko.observable();
-        self.config_checkoutFolder = ko.observable();
-        self.config_checkType = ko.observable();
-
-        self.configurationDialog = $("#settings_plugin_softwareupdate_configurationdialog");
-        self.confirmationDialog = $("#softwareupdate_confirmation_dialog");
-
-        self.config_availableCheckTypes = [
-            {"key": "github_release", "name": gettext("Release")},
-            {"key": "git_commit", "name": gettext("Commit")}
-        ];
-
-        self.reloadOverlay = $("#reloadui_overlay");
-
-        self.versions = new ItemListHelper(
-            "plugin.softwareupdate.versions",
-            {
-                "name": function(a, b) {
-                    // sorts ascending, puts octoprint first
-                    if (a.key.toLocaleLowerCase() == "octoprint") return -1;
-                    if (b.key.toLocaleLowerCase() == "octoprint") return 1;
-
-                    if (a.displayName.toLocaleLowerCase() < b.displayName.toLocaleLowerCase()) return -1;
-                    if (a.displayName.toLocaleLowerCase() > b.displayName.toLocaleLowerCase()) return 1;
-                    return 0;
-                }
-            },
-            {},
-            "name",
-            [],
-            [],
-            5
-        );
-
-        self.availableAndPossible = ko.computed(function() {
-            return _.filter(self.versions.items(), function(info) { return info.updateAvailable && info.updatePossible; });
-        });
-
-        self.onUserLoggedIn = function() {
-            self.performCheck();
-        };
-
-        self._showPopup = function(options, eventListeners) {
-            self._closePopup();
-            self.popup = new PNotify(options);
-
-            if (eventListeners) {
-                var popupObj = self.popup.get();
-                _.each(eventListeners, function(value, key) {
-                    popupObj.on(key, value);
-                })
-            }
-        };
-
-        self._updatePopup = function(options) {
-            if (self.popup === undefined) {
-                self._showPopup(options);
-            } else {
-                self.popup.update(options);
-            }
-        };
-
-        self._closePopup = function() {
-            if (self.popup !== undefined) {
-                self.popup.remove();
-            }
-        };
-
-        self.showPluginSettings = function() {
-            self._copyConfig();
-            self.configurationDialog.modal();
-        };
-
-        self.savePluginSettings = function() {
-            var data = {
-                plugins: {
-                    softwareupdate: {
-                        cache_ttl: parseInt(self.config_cacheTtl()),
-                        octoprint_checkout_folder: self.config_checkoutFolder(),
-                        octoprint_type: self.config_checkType()
-                    }
-                }
-            };
-            self.settings.saveData(data, function() {
-                self.configurationDialog.modal("hide");
-                self._copyConfig();
-                self.performCheck();
-            });
-        };
-
-        self._copyConfig = function() {
-            self.config_cacheTtl(self.settings.settings.plugins.softwareupdate.cache_ttl());
-            self.config_checkoutFolder(self.settings.settings.plugins.softwareupdate.octoprint_checkout_folder());
-            self.config_checkType(self.settings.settings.plugins.softwareupdate.octoprint_type());
-        };
-
-        self.fromCheckResponse = function(data, ignoreSeen, showIfNothingNew) {
-            var versions = [];
-            _.each(data.information, function(value, key) {
-                value["key"] = key;
-
-                if (!value.hasOwnProperty("displayName") || value.displayName == "") {
-                    value.displayName = value.key;
-                }
-                if (!value.hasOwnProperty("displayVersion") || value.displayVersion == "") {
-                    value.displayVersion = value.information.local.name;
-                }
-                if (!value.hasOwnProperty("releaseNotes") || value.releaseNotes == "") {
-                    value.releaseNotes = undefined;
-                }
-
-                var fullNameTemplate = gettext("%(name)s: %(version)s");
-                value.fullNameLocal = _.sprintf(fullNameTemplate, {name: value.displayName, version: value.displayVersion});
-
-                var fullNameRemoteVars = {name: value.displayName, version: gettext("unknown")};
-                if (value.hasOwnProperty("information") && value.information.hasOwnProperty("remote") && value.information.remote.hasOwnProperty("name")) {
-                    fullNameRemoteVars.version = value.information.remote.name;
-                }
-                value.fullNameRemote = _.sprintf(fullNameTemplate, fullNameRemoteVars);
-
-                versions.push(value);
-            });
-            self.versions.updateItems(versions);
-
-            var octoprint = data.information["octoprint"];
-            if (octoprint && octoprint.hasOwnProperty("check")) {
-                var check = octoprint.check;
-                if (BRANCH != "master" && check["type"] == "github_release") {
-                    self.octoprintUnreleased(true);
-                } else {
-                    self.octoprintUnreleased(false);
-                }
-
-                var checkoutFolder = (check["checkout_folder"] || "").trim();
-                var updateFolder = (check["update_folder"] || "").trim();
-                var checkType = check["type"] || "";
-                if ((checkType == "github_release" || checkType == "git_commit") && checkoutFolder == "" && updateFolder == "") {
-                    self.octoprintUnconfigured(true);
-                } else {
-                    self.octoprintUnconfigured(false);
-                }
-            }
-
-            if (data.status == "updateAvailable" || data.status == "updatePossible") {
-                var text = "<div class='softwareupdate_notification'>" + gettext("There are updates available for the following components:");
-
-                text += "<ul class='icons-ul'>";
-                _.each(self.versions.items(), function(update_info) {
-                    if (update_info.updateAvailable) {
-                        text += "<li>"
-                            + "<i class='icon-li " + (update_info.updatePossible ? "icon-ok" : "icon-remove")+ "'></i>"
-                            + "<span class='name' title='" + update_info.fullNameRemote + "'>" + update_info.fullNameRemote + "</span>"
-                            + (update_info.releaseNotes ? "<a href=\"" +  update_info.releaseNotes + "\" target=\"_blank\">" + gettext("Release Notes") + "</a>" : "")
-                            + "</li>";
-                    }
-                });
-                text += "</ul>";
-
-                text += "<small>" + gettext("Those components marked with <i class=\"icon-ok\"></i> can be updated directly.") + "</small>";
-
-                text += "</div>";
-
-                var options = {
-                    title: gettext("Update Available"),
-                    text: text,
-                    hide: false
-                };
-                var eventListeners = {};
-
-                if (data.status == "updatePossible" && self.loginState.isAdmin()) {
-                    // if user is admin, add action buttons
-                    options["confirm"] = {
-                        confirm: true,
-                        buttons: [{
-                            text: gettext("Ignore"),
-                            click: function() {
-                                self._markNotificationAsSeen(data.information);
-                                self._showPopup({
-                                    text: gettext("You can make this message display again via \"Settings\" > \"Software Update\" > \"Check for update now\"")
-                                });
-                            }
-                        }, {
-                            text: gettext("Update now"),
-                            addClass: "btn-primary",
-                            click: self.update
-                        }]
-                    };
-                    options["buttons"] = {
-                        closer: false,
-                        sticker: false
-                    };
-                }
-
-                if (ignoreSeen || !self._hasNotificationBeenSeen(data.information)) {
-                    self._showPopup(options, eventListeners);
-                }
-            } else if (data.status == "current") {
-                if (showIfNothingNew) {
-                    self._showPopup({
-                        title: gettext("Everything is up-to-date"),
-                        hide: false,
-                        type: "success"
-                    });
-                } else {
-                    self._closePopup();
-                }
-            }
-        };
-
-        self.performCheck = function(showIfNothingNew, force, ignoreSeen) {
-            if (!self.loginState.isUser()) return;
-
-            var url = PLUGIN_BASEURL + "softwareupdate/check";
-            if (force) {
-                url += "?force=true";
-            }
-
-            $.ajax({
-                url: url,
-                type: "GET",
-                dataType: "json",
-                success: function(data) {
-                    self.fromCheckResponse(data, ignoreSeen, showIfNothingNew);
-                }
-            });
-        };
-
-        self._markNotificationAsSeen = function(data) {
-            if (!Modernizr.localstorage)
-                return false;
-            localStorage["plugin.softwareupdate.seen_information"] = JSON.stringify(self._informationToRemoteVersions(data));
-        };
-
-        self._hasNotificationBeenSeen = function(data) {
-            if (!Modernizr.localstorage)
-                return false;
-
-            if (localStorage["plugin.softwareupdate.seen_information"] == undefined)
-                return false;
-
-            var knownData = JSON.parse(localStorage["plugin.softwareupdate.seen_information"]);
-            var freshData = self._informationToRemoteVersions(data);
-
-            var hasBeenSeen = true;
-            _.each(freshData, function(value, key) {
-                if (!_.has(knownData, key) || knownData[key] != freshData[key]) {
-                    hasBeenSeen = false;
-                }
-            });
-            return hasBeenSeen;
-        };
-
-        self._informationToRemoteVersions = function(data) {
-            var result = {};
-            _.each(data, function(value, key) {
-                result[key] = value.information.remote.value;
-            });
-            return result;
-        };
-
-        self.performUpdate = function(force, items) {
-            self.updateInProgress = true;
-
-            var options = {
-                title: gettext("Updating..."),
-                text: gettext("Now updating, please wait."),
-                icon: "icon-cog icon-spin",
-                hide: false,
-                buttons: {
-                    closer: false,
-                    sticker: false
-                }
-            };
-            self._showPopup(options);
-
-            var postData = {
-                force: (force == true)
-            };
-            if (items != undefined) {
-                postData.check = items;
-            }
-
-            $.ajax({
-                url: PLUGIN_BASEURL + "softwareupdate/update",
-                type: "POST",
-                dataType: "json",
-                contentType: "application/json; charset=UTF-8",
-                data: JSON.stringify(postData),
-                error: function() {
-                    self.updateInProgress = false;
-                    self._showPopup({
-                        title: gettext("Update not started!"),
-                        text: gettext("The update could not be started. Is it already active? Please consult the log for details."),
-                        type: "error",
-                        hide: false,
-                        buttons: {
-                            sticker: false
-                        }
-                    });
-                },
-                success: function(data) {
-                    self.currentlyBeingUpdated = data.checks;
-                }
-            });
-        };
-
-        self.update = function(force) {
-            if (self.updateInProgress) return;
-            if (!self.loginState.isAdmin()) return;
-
-            if (self.printerState.isPrinting()) {
-                self._showPopup({
-                    title: gettext("Can't update while printing"),
-                    text: gettext("A print job is currently in progress. Updating will be prevented until it is done."),
-                    type: "error"
-                });
-            } else {
-                self.forceUpdate = (force == true);
-                self.confirmationDialog.modal("show");
-            }
-
-        };
-
-        self.confirmUpdate = function() {
-            self.confirmationDialog.hide();
-            self.performUpdate(self.forceUpdate,
-                               _.map(self.availableAndPossible(), function(info) { return info.key }));
-        };
-
-        self.onServerDisconnect = function() {
-            if (self.restartTimeout !== undefined) {
-                clearTimeout(self.restartTimeout);
-            }
-            return true;
-        };
-
-        self.onDataUpdaterReconnect = function() {
-            if (self.waitingForRestart) {
-                self.waitingForRestart = false;
-                self.updateInProgress = false;
-                if (!self.reloadOverlay.is(":visible")) {
-                    self.reloadOverlay.show();
-                }
-            }
-        };
-
-        self.onDataUpdaterPluginMessage = function(plugin, data) {
-            if (plugin != "softwareupdate") {
-                return;
-            }
-
-            var messageType = data.type;
-            var messageData = data.data;
-
-            var options = undefined;
-
-            switch (messageType) {
-                case "updating": {
-                    console.log(JSON.stringify(messageData));
-
-                    var name = self.currentlyBeingUpdated[messageData.target];
-                    if (name == undefined) {
-                        name = messageData.target;
-                    }
-
-                    self._updatePopup({
-                        text: _.sprintf(gettext("Now updating %(name)s to %(version)s"), {name: name, version: messageData.version})
-                    });
-                    break;
-                }
-                case "restarting": {
-                    console.log(JSON.stringify(messageData));
-
-                    options = {
-                        title: gettext("Update successful, restarting!"),
-                        text: gettext("The update finished successfully and the server will now be restarted."),
-                        type: "success",
-                        hide: false,
-                        buttons: {
-                            sticker: false
-                        }
-                    };
-
-                    self.waitingForRestart = true;
-                    self.restartTimeout = setTimeout(function() {
-                        self._showPopup({
-                            title: gettext("Restart failed"),
-                            text: gettext("The server apparently did not restart by itself, you'll have to do it manually. Please consult the log file on what went wrong."),
-                            type: "error",
-                            hide: false,
-                            buttons: {
-                                sticker: false
-                            }
-                        });
-                        self.waitingForRestart = false;
-                    }, 60000);
-
-                    break;
-                }
-                case "restart_manually": {
-                    console.log(JSON.stringify(messageData));
-
-                    var restartType = messageData.restart_type;
-                    var text = gettext("The update finished successfully, please restart RaionPi now.");
-                    if (restartType == "environment") {
-                        text = gettext("The update finished successfully, please reboot the server now.");
-                    }
-
-                    options = {
-                        title: gettext("Update successful, restart required!"),
-                        text: text,
-                        type: "success",
-                        hide: false,
-                        buttons: {
-                            sticker: false
-                        }
-                    };
-                    self.updateInProgress = false;
-                    break;
-                }
-                case "restart_failed": {
-                    var restartType = messageData.restart_type;
-                    var text = gettext("Restarting RaionPi failed, please restart it manually. You might also want to consult the log file on what went wrong here.");
-                    if (restartType == "environment") {
-                        text = gettext("Rebooting the server failed, please reboot it manually. You might also want to consult the log file on what went wrong here.");
-                    }
-
-                    options = {
-                        title: gettext("Restart failed"),
-                        test: gettext("The server apparently did not restart by itself, you'll have to do it manually. Please consult the log file on what went wrong."),
-                        type: "error",
-                        hide: false,
-                        buttons: {
-                            sticker: false
-                        }
-                    };
-                    self.waitingForRestart = false;
-                    self.updateInProgress = false;
-                    break;
-                }
-                case "success": {
-                    options = {
-                        title: gettext("Update successful!"),
-                        text: gettext("The update finished successfully."),
-                        type: "success",
-                        hide: false,
-                        buttons: {
-                            sticker: false
-                        }
-                    };
-                    self.updateInProgress = false;
-                    break;
-                }
-                case "error": {
-                    self._showPopup({
-                        title: gettext("Update failed!"),
-                        text: gettext("The update did not finish successfully. Please consult the log for details."),
-                        type: "error",
-                        hide: false,
-                        buttons: {
-                            sticker: false
-                        }
-                    });
-                    self.updateInProgress = false;
-                    break;
-                }
-                case "update_versions": {
-                    self.performCheck();
-                    break;
-                }
-            }
-
-            if (options != undefined) {
-                self._showPopup(options);
-            }
-        };
-
-    }
-
-    // view model class, parameters for constructor, container to bind to
-    ADDITIONAL_VIEWMODELS.push([
-        SoftwareUpdateViewModel,
-        ["loginStateViewModel", "printerStateViewModel", "settingsViewModel"],
-        ["#settings_plugin_softwareupdate", "#softwareupdate_confirmation_dialog"]
-    ]);
-});
-
-;
-
 /*! jQuery UI Virtual Keyboard v1.25.25 */
 !function(a){"function"==typeof define&&define.amd?define(["jquery"],a):"object"==typeof module&&"object"==typeof module.exports?module.exports=a(require("jquery")):a(jQuery)}(function(a){"use strict";var b=a.keyboard=function(c,d){var e,f=this;f.version="1.25.25",f.$el=a(c),f.el=c,f.$el.data("keyboard",f),f.init=function(){var c,g,h,i=b.css,j=b.events;f.settings=d||{},d&&d.position&&(g=a.extend({},d.position),d.position=null),f.options=e=a.extend(!0,{},b.defaultOptions,d),g&&(e.position=g,d.position=g),f.el.active=!0,f.namespace=".keyboard"+Math.random().toString(16).slice(2),f.extensionNamespace=[],f.shiftActive=f.altActive=f.metaActive=f.sets=f.capsLock=!1,f.rows=["","-shift","-alt","-alt-shift"],f.inPlaceholder=f.$el.attr("placeholder")||"",f.watermark=b.watermark&&""!==f.inPlaceholder,f.repeatTime=1e3/(e.repeatRate||20),e.preventDoubleEventTime=e.preventDoubleEventTime||100,f.isOpen=!1,f.wheel=a.isFunction(a.fn.mousewheel),f.escapeRegex=/[-\/\\^$*+?.()|[\]{}]/g,c=b.keyCodes,f.alwaysAllowed=[c.capsLock,c.pageUp,c.pageDown,c.end,c.home,c.left,c.up,c.right,c.down,c.insert,c["delete"]],f.$keyboard=[],f.enabled=!0,a.isEmptyObject(e.position)||(e.position.orig_at=e.position.at),f.checkCaret=e.lockInput||b.checkCaretSupport(),f.last={start:0,end:0,key:"",val:"",preVal:"",layout:"",virtual:!0,keyset:[!1,!1,!1],wheel_$Keys:null,wheelIndex:0,wheelLayers:[]},f.temp=["",0,0],a.each([j.kbInit,j.kbBeforeVisible,j.kbVisible,j.kbHidden,j.inputCanceled,j.inputAccepted,j.kbBeforeClose],function(b,c){a.isFunction(e[c])&&f.$el.bind(c+f.namespace+"callbacks",e[c])}),e.alwaysOpen&&(e.stayOpen=!0),h=a(document),f.el.ownerDocument!==document&&(h=h.add(f.el.ownerDocument)),h.bind("mousedown keyup touchstart checkkeyboard ".split(" ").join(f.namespace+" "),f.checkClose),f.$el.addClass(i.input+" "+e.css.input).attr({"aria-haspopup":"true",role:"textbox"}),(e.lockInput||f.el.readOnly)&&(e.lockInput=!0,f.$el.addClass(i.locked).attr({readonly:"readonly"})),(f.$el.is(":disabled")||f.$el.attr("readonly")&&!f.$el.hasClass(i.locked))&&f.$el.addClass(i.noKeyboard),e.openOn&&f.bindFocus(),f.watermark||""!==f.$el.val()||""===f.inPlaceholder||""===f.$el.attr("placeholder")||f.$el.addClass(i.placeholder).val(f.inPlaceholder),f.$el.trigger(j.kbInit,[f,f.el]),e.alwaysOpen&&f.reveal()},f.toggle=function(){var a=f.$keyboard.find("."+b.css.keyToggle),c=!f.enabled;f.$preview.prop("readonly",c||f.options.lockInput),f.$keyboard.toggleClass(b.css.keyDisabled,c).find("."+b.css.keyButton).not(a).prop("disabled",c).attr("aria-disabled",c),a.toggleClass(b.css.keyDisabled,c),c&&f.typing_options&&(f.typing_options.text="")},f.setCurrent=function(){var c=b.css,d=a("."+c.isCurrent),e=d.data("keyboard");a.isEmptyObject(e)||e.el===f.el||e.close(e.options.autoAccept?"true":!1),d.removeClass(c.isCurrent),a("."+c.hasFocus).removeClass(c.hasFocus),f.$el.addClass(c.isCurrent),f.$keyboard.addClass(c.hasFocus),f.isCurrent(!0),f.isOpen=!0},f.isCurrent=function(a){var c=b.currentKeyboard||!1;return a?c=b.currentKeyboard=f.el:a===!1&&c===f.el&&(c=b.currentKeyboard=""),c===f.el},f.isVisible=function(){return f.$keyboard&&f.$keyboard.length?f.$keyboard.is(":visible"):!1},f.focusOn=function(){!f&&f.el.active||f.isVisible()||(clearTimeout(f.timer),f.reveal())},f.redraw=function(){f.$keyboard.length&&(f.last.preVal=""+f.last.val,f.last.val=f.$preview&&f.$preview.val()||f.$el.val(),f.$el.val(f.last.val),f.removeKeyboard(),f.shiftActive=f.altActive=f.metaActive=!1),f.isOpen=e.alwaysOpen,f.reveal(!0)},f.reveal=function(c){var d=f.isOpen,g=b.css;return f.opening=!d,a("."+g.keyboard).not("."+g.alwaysOpen).each(function(){var b=a(this).data("keyboard");a.isEmptyObject(b)||b.close(b.options.autoAccept&&b.options.autoAcceptOnEsc?"true":!1)}),f.$el.is(":disabled")||f.$el.attr("readonly")&&!f.$el.hasClass(g.locked)?void f.$el.addClass(g.noKeyboard):(f.$el.removeClass(g.noKeyboard),e.openOn&&f.$el.unbind(a.trim((e.openOn+" ").split(/\s+/).join(f.namespace+" "))),f.$keyboard&&(!f.$keyboard||f.$keyboard.length&&!a.contains(document.body,f.$keyboard[0]))||f.startup(),f.watermark||f.el.value!==f.inPlaceholder||f.$el.removeClass(g.placeholder).val(""),f.originalContent=f.$el.val(),f.$preview.val(f.originalContent),e.acceptValid&&f.checkValid(),e.resetDefault&&(f.shiftActive=f.altActive=f.metaActive=!1),f.showSet(),f.isVisible()||f.$el.trigger(b.events.kbBeforeVisible,[f,f.el]),f.setCurrent(),f.toggle(),f.$keyboard.show(),e.usePreview&&b.msie&&("undefined"==typeof f.width&&(f.$preview.hide(),f.width=Math.ceil(f.$keyboard.width()),f.$preview.show()),f.$preview.width(f.width)),f.position=a.isEmptyObject(e.position)?!1:e.position,a.ui&&a.ui.position&&f.position&&(f.position.of=f.position.of||f.$el.data("keyboardPosition")||f.$el,f.position.collision=f.position.collision||"flipfit flipfit",e.position.at=e.usePreview?e.position.orig_at:e.position.at2,f.$keyboard.position(f.position)),f.checkDecimal(),f.lineHeight=parseInt(f.$preview.css("lineHeight"),10)||parseInt(f.$preview.css("font-size"),10)+4,e.caretToEnd&&f.saveCaret(f.originalContent.length,f.originalContent.length),b.allie&&(0===f.last.end&&f.last.start>0&&(f.last.end=f.last.start),f.last.start<0&&(f.last.start=f.last.end=f.originalContent.length)),d||c?(b.caret(f.$preview,f.last),f):(f.timer2=setTimeout(function(){var a;f.opening=!1,/(number|email)/i.test(f.el.type)||e.caretToEnd||f.saveCaret(a,a,f.$el),e.initialFocus&&b.caret(f.$preview,f.last),f.last.eventTime=(new Date).getTime(),f.$el.trigger(b.events.kbVisible,[f,f.el]),f.timer=setTimeout(function(){f&&f.saveCaret()},200)},10),f))},f.updateLanguage=function(){var c=b.layouts,d=e.language||c[e.layout]&&c[e.layout].lang&&c[e.layout].lang||[e.language||"en"],g=b.language;d=(a.isArray(d)?d[0]:d).split("-")[0],e.display=a.extend(!0,{},g.en.display,g[d]&&g[d].display||{},f.settings.display),e.combos=a.extend(!0,{},g.en.combos,g[d]&&g[d].combos||{},f.settings.combos),e.wheelMessage=g[d]&&g[d].wheelMessage||g.en.wheelMessage,e.rtl=c[e.layout]&&c[e.layout].rtl||g[d]&&g[d].rtl||!1,f.regex=g[d]&&g[d].comboRegex||b.comboRegex,f.decimal=/^\./.test(e.display.dec),f.$el.toggleClass("rtl",e.rtl).css("direction",e.rtl?"rtl":"")},f.startup=function(){var c=b.css;(e.alwaysOpen||e.userClosed)&&f.$preview||f.makePreview(),f.$keyboard&&f.$keyboard.length||("custom"===e.layout&&(e.layoutHash="custom"+f.customHash()),f.layout="custom"===e.layout?e.layoutHash:e.layout,f.last.layout=f.layout,f.updateLanguage(),"undefined"==typeof b.builtLayouts[f.layout]&&(a.isFunction(e.create)?f.$keyboard=e.create(f):f.$keyboard.length||f.buildKeyboard(f.layout,!0)),f.$keyboard=b.builtLayouts[f.layout].$keyboard.clone(),f.$keyboard.data("keyboard",f),""!==(f.el.id||"")&&f.$keyboard.attr("id",f.el.id+b.css.idSuffix),f.makePreview(),e.usePreview?a.isEmptyObject(e.position)||(e.position.at=e.position.orig_at):a.isEmptyObject(e.position)||(e.position.at=e.position.at2)),f.$decBtn=f.$keyboard.find("."+c.keyPrefix+"dec"),(e.enterNavigation||"TEXTAREA"===f.el.nodeName)&&f.alwaysAllowed.push(13),f.bindKeyboard(),f.$keyboard.appendTo(e.appendLocally?f.$el.parent():e.appendTo||"body"),f.bindKeys(),e.reposition&&a.ui&&a.ui.position&&"body"==e.appendTo&&a(window).bind("resize"+f.namespace,function(){f.position&&f.isVisible()&&f.$keyboard.position(f.position)})},f.makePreview=function(){if(e.usePreview){var c,d,g,h,i=b.css;for(f.$preview=f.$el.clone(!1).data("keyboard",f).removeClass(i.placeholder+" "+i.input).addClass(i.preview+" "+e.css.input).attr("tabindex","-1").show(),f.preview=f.$preview[0],"number"===f.preview.type&&(f.preview.type="text"),h=/^(data-|id|aria-haspopup)/i,d=f.$preview.get(0).attributes,c=d.length-1;c>=0;c--)g=d[c]&&d[c].name,h.test(g)&&f.preview.removeAttribute(g);a("<div />").addClass(i.wrapper).append(f.$preview).prependTo(f.$keyboard)}else f.$preview=f.$el,f.preview=f.el},f.saveCaret=function(a,c,d){var e=b.caret(d||f.$preview,a,c);f.last.start="undefined"==typeof a?e.start:a,f.last.end="undefined"==typeof c?e.end:c},f.setScroll=function(){if(f.last.virtual){var a,c,d,g,h="TEXTAREA"===f.preview.nodeName,i=f.last.val.substring(0,Math.max(f.last.start,f.last.end));f.$previewCopy||(f.$previewCopy=f.$preview.clone().removeAttr("id").css({position:"absolute",left:0,zIndex:-10,visibility:"hidden"}).addClass(b.css.inputClone),h||f.$previewCopy.css({"white-space":"pre",width:0}),e.usePreview?f.$preview.after(f.$previewCopy):f.$keyboard.prepend(f.$previewCopy)),h?(f.$previewCopy.height(f.lineHeight).val(i),f.preview.scrollTop=f.lineHeight*(Math.floor(f.$previewCopy[0].scrollHeight/f.lineHeight)-1)):(f.$previewCopy.val(i.replace(/\s/g," ")),d=/c/i.test(e.scrollAdjustment)?f.preview.clientWidth/2:e.scrollAdjustment,a=f.$previewCopy[0].scrollWidth-1,"undefined"==typeof f.last.scrollWidth&&(f.last.scrollWidth=a,f.last.direction=!0),g=f.last.scrollWidth===a?f.last.direction:f.last.scrollWidth<a,c=f.preview.clientWidth-d,g?c>a?f.preview.scrollLeft=0:f.preview.scrollLeft=a-c:a>=f.preview.scrollWidth-c?f.preview.scrollLeft=f.preview.scrollWidth-d:a-d>0?f.preview.scrollLeft=a-d:f.preview.scrollLeft=0,f.last.scrollWidth=a,f.last.direction=g)}},f.bindFocus=function(){e.openOn&&f&&f.el.active&&(f.$el.bind(e.openOn+f.namespace,function(){f.focusOn()}),a(":focus")[0]===f.el&&f.$el.blur())},f.bindKeyboard=function(){var c,d=b.keyCodes,g=b.builtLayouts[f.layout];f.$preview.unbind(f.namespace).bind("click"+f.namespace+" touchstart"+f.namespace,function(){e.alwaysOpen&&!f.isCurrent()&&f.reveal(),f.timer2=setTimeout(function(){f&&f.saveCaret()},150)}).bind("keypress"+f.namespace,function(h){if(e.lockInput)return!1;var i=h.charCode||h.which,j=i>=d.A&&i<=d.Z,k=i>=d.a&&i<=d.z,l=f.last.key=String.fromCharCode(i);if(f.last.virtual=!1,f.last.event=h,f.last.$key=[],f.checkCaret&&f.saveCaret(),i!==d.capsLock&&(j||k)&&(f.capsLock=j&&!h.shiftKey||k&&h.shiftKey,f.capsLock&&!f.shiftActive&&(f.shiftActive=!0,f.showSet())),e.restrictInput){if((h.which===d.backSpace||0===h.which)&&a.inArray(h.keyCode,f.alwaysAllowed))return;-1===a.inArray(l,g.acceptedKeys)&&(h.preventDefault(),c=a.extend({},h),c.type=b.events.inputRestricted,f.$el.trigger(c,[f,f.el]),a.isFunction(e.restricted)&&e.restricted(c,f,f.el))}else if((h.ctrlKey||h.metaKey)&&(h.which===d.A||h.which===d.C||h.which===d.V||h.which>=d.X&&h.which<=d.Z))return;g.hasMappedKeys&&g.mappedKeys.hasOwnProperty(l)&&(f.last.key=g.mappedKeys[l],f.insertText(f.last.key),h.preventDefault()),f.checkMaxLength()}).bind("keyup"+f.namespace,function(c){switch(f.last.virtual=!1,c.which){case d.tab:if(f.tab&&e.tabNavigation&&!e.lockInput){f.shiftActive=c.shiftKey;var g=b.keyaction.tab(f);if(f.tab=!1,!g)return!1}else c.preventDefault();break;case d.escape:return e.ignoreEsc||f.close(e.autoAccept&&e.autoAcceptOnEsc?"true":!1),!1}return clearTimeout(f.throttled),f.throttled=setTimeout(function(){f&&f.isVisible()&&f.checkCombos()},100),f.checkMaxLength(),f.last.preVal=""+f.last.val,f.last.val=f.$preview.val(),c.type=b.events.kbChange,c.action=f.last.key,f.$el.trigger(c,[f,f.el]),a.isFunction(e.change)?(c.type=b.events.inputChange,e.change(c,f,f.el),!1):void 0}).bind("keydown"+f.namespace,function(a){if(e.alwaysOpen&&!f.isCurrent()&&f.reveal(),a.which===d.tab)return f.tab=!0,!1;if(e.lockInput)return!1;switch(f.last.virtual=!1,a.which){case d.backSpace:b.keyaction.bksp(f,null,a),a.preventDefault();break;case d.enter:b.keyaction.enter(f,null,a);break;case d.capsLock:f.shiftActive=f.capsLock=!f.capsLock,f.showSet();break;case d.V:if(a.ctrlKey||a.metaKey){if(e.preventPaste)return void a.preventDefault();f.checkCombos()}}}).bind("mouseup touchend ".split(" ").join(f.namespace+" "),function(){f.last.virtual=!0,f.saveCaret()}),f.$keyboard.bind("mousedown click touchstart ".split(" ").join(f.namespace+" "),function(b){b.stopPropagation(),f.isCurrent()||(f.reveal(),a(document).trigger("checkkeyboard"+f.namespace)),e.noFocus||f.$preview.focus()}),e.preventPaste&&(f.$preview.bind("contextmenu"+f.namespace,function(a){a.preventDefault()}),f.$el.bind("contextmenu"+f.namespace,function(a){a.preventDefault()}))},f.bindKeys=function(){var c=b.css;f.$allKeys=f.$keyboard.find("button."+c.keyButton).unbind(f.namespace+" "+f.namespace+"kb").bind("mouseenter mouseleave touchstart ".split(" ").join(f.namespace+" "),function(c){if(!e.alwaysOpen&&!e.userClosed||"mouseleave"===c.type||f.isCurrent()||(f.reveal(),f.$preview.focus(),b.caret(f.$preview,f.last)),f.isCurrent()){var d,g,h=f.last,i=a(this),j=c.type;e.useWheel&&f.wheel&&(d=f.getLayers(i),g=(d.length?d.map(function(){return a(this).attr("data-value")||""}).get():"")||[i.text()],h.wheel_$Keys=d,h.wheelLayers=g,h.wheelIndex=a.inArray(i.attr("data-value"),g)),"mouseenter"!==j&&"touchstart"!==j||"password"===f.el.type||i.hasClass(e.css.buttonDisabled)||(i.addClass(e.css.buttonHover),e.useWheel&&f.wheel&&i.attr("title",function(a,b){return f.wheel&&""===b&&f.sets&&g.length>1&&"touchstart"!==j?e.wheelMessage:b})),"mouseleave"===j&&(i.removeClass("password"===f.el.type?"":e.css.buttonHover),e.useWheel&&f.wheel&&(h.wheelIndex=0,h.wheelLayers=[],h.wheel_$Keys=null,i.attr("title",function(a,b){return b===e.wheelMessage?"":b}).html(i.attr("data-html"))))}}).bind(e.keyBinding.split(" ").join(f.namespace+" ")+f.namespace+" "+b.events.kbRepeater,function(d){if(d.preventDefault(),!f.$keyboard.is(":visible"))return!1;var g,h,i=f.last,j=this,k=a(j),l=(new Date).getTime();if(e.useWheel&&f.wheel&&(h=i.wheel_$Keys,k=h&&i.wheelIndex>-1?h.eq(i.wheelIndex):k),g=k.attr("data-action"),!(l-(i.eventTime||0)<e.preventDoubleEventTime)){if(i.eventTime=l,i.event=d,i.virtual=!0,e.noFocus||f.$preview.focus(),i.$key=k,i.key=k.attr("data-value"),f.checkCaret&&b.caret(f.$preview,i),g.match("meta")&&(g="meta"),g===i.key&&"string"==typeof b.keyaction[g])i.key=g=b.keyaction[g];else if(g in b.keyaction&&a.isFunction(b.keyaction[g])){if(b.keyaction[g](f,this,d)===!1)return!1;g=null}return"undefined"!=typeof g&&null!==g&&(i.key=a(this).hasClass(c.keyAction)?g:i.key,f.insertText(i.key),f.capsLock||e.stickyShift||d.shiftKey||(f.shiftActive=!1,f.showSet(k.attr("data-name")))),b.caret(f.$preview,i),f.checkCombos(),d.type=b.events.kbChange,d.action=i.key,f.$el.trigger(d,[f,f.el]),i.preVal=""+i.val,i.val=f.$preview.val(),a.isFunction(e.change)?(d.type=b.events.inputChange,e.change(d,f,f.el),!1):void 0}}).bind("mouseup"+f.namespace+" "+"mouseleave touchend touchmove touchcancel ".split(" ").join(f.namespace+"kb "),function(c){f.last.virtual=!0;var d,g=a(this);if("touchmove"===c.type){if(d=g.offset(),d.right=d.left+g.outerWidth(),d.bottom=d.top+g.outerHeight(),c.originalEvent.touches[0].pageX>=d.left&&c.originalEvent.touches[0].pageX<d.right&&c.originalEvent.touches[0].pageY>=d.top&&c.originalEvent.touches[0].pageY<d.bottom)return!0}else/(mouseleave|touchend|touchcancel)/i.test(c.type)?g.removeClass(e.css.buttonHover):(!e.noFocus&&f.isVisible()&&f.isCurrent()&&f.$preview.focus(),f.checkCaret&&b.caret(f.$preview,f.last));return f.mouseRepeat=[!1,""],clearTimeout(f.repeater),!1}).bind("click"+f.namespace,function(){return!1}).not("."+c.keyAction).bind("mousewheel"+f.namespace,function(b,c){if(e.useWheel&&f.wheel){c=c||b.deltaY;var d,g=f.last.wheelLayers||[];return g.length>1?(d=f.last.wheelIndex+(c>0?-1:1),d>g.length-1&&(d=0),0>d&&(d=g.length-1)):d=0,f.last.wheelIndex=d,a(this).html(g[d]),!1}}).add("."+c.keyPrefix+"tab bksp space enter".split(" ").join(",."+c.keyPrefix),f.$keyboard).bind("mousedown touchstart ".split(" ").join(f.namespace+"kb "),function(){if(0!==e.repeatRate){var b=a(this);f.mouseRepeat=[!0,b],setTimeout(function(){f&&f.mouseRepeat[0]&&f.mouseRepeat[1]===b&&!b[0].disabled&&f.repeatKey(b)},e.repeatDelay)}return!1})},f.insertText=function(a){if("undefined"!=typeof a){var c,d,e="\b"===a,g=f.$preview.val(),h=b.caret(f.$preview),i=g.length;h.end<h.start&&(h.end=h.start),h.start>i&&(h.end=h.start=i),"TEXTAREA"===f.preview.nodeName&&b.msie&&"\n"===g.substr(h.start,1)&&(h.start+=1,h.end+=1),"{d}"===a&&(a="",d=h.start,h.end+=1),c=e&&h.start===h.end,a=e?"":a,g=g.substr(0,h.start-(c?1:0))+a+g.substr(h.end),d=h.start+(c?-1:a.length),f.$preview.val(g),f.saveCaret(d,d),f.setScroll()}},f.checkMaxLength=function(){var a,c,d=f.$preview.val();e.maxLength!==!1&&d.length>e.maxLength&&(a=b.caret(f.$preview).start,c=Math.min(a,e.maxLength),e.maxInsert||(d=f.last.val,c=a-1),f.$preview.val(d.substring(0,e.maxLength)),f.saveCaret(c,c)),f.$decBtn.length&&f.checkDecimal()},f.repeatKey=function(a){a.trigger(b.events.kbRepeater),f.mouseRepeat[0]&&(f.repeater=setTimeout(function(){f&&f.repeatKey(a)},f.repeatTime))},f.showKeySet=function(a){"string"==typeof a?(f.last.keyset=[f.shiftActive,f.altActive,f.metaActive],f.shiftActive=/shift/i.test(a),f.altActive=/alt/i.test(a),/meta/.test(a)?(f.metaActive=!0,f.showSet(a.match(/meta\d+/i)[0])):(f.metaActive=!1,f.showSet())):f.showSet(a)},f.showSet=function(a){e=f.options;var c=b.css,d="."+c.keyPrefix,g=e.css.buttonActive,h="",i=(f.shiftActive?1:0)+(f.altActive?2:0);return f.shiftActive||(f.capsLock=!1),f.metaActive?(h=/meta/i.test(a)?a:"",""===h?h=f.metaActive===!0?"":f.metaActive:f.metaActive=h,(!e.stickyShift&&f.last.keyset[2]!==f.metaActive||(f.shiftActive||f.altActive)&&!f.$keyboard.find("."+c.keySet+"-"+h+f.rows[i]).length)&&(f.shiftActive=f.altActive=!1)):!e.stickyShift&&f.last.keyset[2]!==f.metaActive&&f.shiftActive&&(f.shiftActive=f.altActive=!1),i=(f.shiftActive?1:0)+(f.altActive?2:0),h=0!==i||f.metaActive?""===h?"":"-"+h:"-normal",f.$keyboard.find("."+c.keySet+h+f.rows[i]).length?(f.$keyboard.find(d+"alt,"+d+"shift,."+c.keyAction+"[class*=meta]").removeClass(g).end().find(d+"alt").toggleClass(g,f.altActive).end().find(d+"shift").toggleClass(g,f.shiftActive).end().find(d+"lock").toggleClass(g,f.capsLock).end().find("."+c.keySet).hide().end().find("."+c.keyAction+d+h).addClass(g),f.$keyboard.find("."+c.keySet+h+f.rows[i])[0].style.display="inline-block",f.metaActive&&f.$keyboard.find(d+f.metaActive).toggleClass(g,f.metaActive!==!1),f.last.keyset=[f.shiftActive,f.altActive,f.metaActive],void f.$el.trigger(b.events.kbKeysetChange,[f,f.el])):(f.shiftActive=f.last.keyset[0],f.altActive=f.last.keyset[1],void(f.metaActive=f.last.keyset[2]))},f.checkCombos=function(){if(!f.isVisible()&&!f.$keyboard.hasClass(b.css.hasFocus))return f.$preview.val();var c,d,g,h=f.$preview.val(),i=b.caret(f.$preview),j=b.builtLayouts[f.layout],k=h.length;return""===h?(e.acceptValid&&f.checkValid(),h):(i.end<i.start&&(i.end=i.start),i.start>k&&(i.end=i.start=k),b.msie&&"\n"===h.substr(i.start,1)&&(i.start+=1,i.end+=1),e.useCombos&&(b.msie?h=h.replace(f.regex,function(a,b,c){return e.combos.hasOwnProperty(b)?e.combos[b][c]||a:a}):f.$preview.length&&(d=i.start-(i.start-2>=0?2:0),b.caret(f.$preview,d,i.end),g=(b.caret(f.$preview).text||"").replace(f.regex,function(a,b,c){return e.combos.hasOwnProperty(b)?e.combos[b][c]||a:a}),f.$preview.val(b.caret(f.$preview).replaceStr(g)),h=f.$preview.val())),e.restrictInput&&""!==h&&(d=j.acceptedKeys.length,c=j.acceptedKeysRegex,c||(g=a.map(j.acceptedKeys,function(a){return a.replace(f.escapeRegex,"\\$&")}),c=j.acceptedKeysRegex=new RegExp("("+g.join("|")+")","g")),g=h.match(c),g?h=g.join(""):(h="",k=0)),i.start+=h.length-k,i.end+=h.length-k,f.$preview.val(h),f.saveCaret(i.start,i.end),f.setScroll(),f.checkMaxLength(),e.acceptValid&&f.checkValid(),h)},f.checkValid=function(){var c=b.css,d=f.$keyboard.find("."+c.keyPrefix+"accept"),g=!0;a.isFunction(e.validate)&&(g=e.validate(f,f.$preview.val(),!1)),d.toggleClass(c.inputInvalid,!g).toggleClass(c.inputValid,g).attr("title",d.attr("data-title")+" ("+e.display[g?"valid":"invalid"]+")")},f.checkDecimal=function(){f.decimal&&/\./g.test(f.preview.value)||!f.decimal&&/\,/g.test(f.preview.value)?f.$decBtn.attr({disabled:"disabled","aria-disabled":"true"}).removeClass(e.css.buttonHover).addClass(e.css.buttonDisabled):f.$decBtn.removeAttr("disabled").attr({"aria-disabled":"false"}).addClass(e.css.buttonDefault).removeClass(e.css.buttonDisabled)},f.getLayers=function(c){var d=b.css,e=c.attr("data-pos"),f=c.closest("."+d.keyboard).find('button[data-pos="'+e+'"]');return f.filter(function(){return""!==a(this).find("."+d.keyText).text()}).add(c)},f.switchInput=function(b,c){if(a.isFunction(e.switchInput))e.switchInput(f,b,c);else{f.$keyboard.length&&f.$keyboard.hide();var d,g=!1,h=a("button, input, textarea, a").filter(":visible").not(":disabled"),i=h.index(f.$el)+(b?1:-1);if(f.$keyboard.length&&f.$keyboard.show(),i>h.length-1&&(g=e.stopAtEnd,i=0),0>i&&(g=e.stopAtEnd,i=h.length-1),!g){if(c=f.close(c),!c)return;d=h.eq(i).data("keyboard"),d&&d.options.openOn.length?d.focusOn():h.eq(i).focus()}}return!1},f.close=function(c){if(f.isOpen&&f.$keyboard.length){clearTimeout(f.throttled);var d=b.css,g=b.events,h=c?f.checkCombos():f.originalContent;if(c&&a.isFunction(e.validate)&&!e.validate(f,h,!0)&&(h=f.originalContent,c=!1,e.cancelClose))return;f.isCurrent(!1),f.isOpen=e.alwaysOpen||e.userClosed,f.$preview.val(h),f.$el.removeClass(d.isCurrent+" "+d.inputAutoAccepted).addClass(c?c===!0?"":d.inputAutoAccepted:"").val(h).trigger(g.inputChange).trigger(e.alwaysOpen?"":g.kbBeforeClose,[f,f.el,c||!1]).trigger(c?g.inputAccepted:g.inputCanceled,[f,f.el]).trigger(e.alwaysOpen?g.kbInactive:g.kbHidden,[f,f.el]).blur(),b.caret(f.$preview,f.last),f&&(f.last.eventTime=(new Date).getTime(),e.alwaysOpen||e.userClosed&&"true"===c||!f.$keyboard.length||(f.removeKeyboard(),f.timer=setTimeout(function(){f&&f.bindFocus()},500)),f.watermark||""!==f.el.value||""===f.inPlaceholder||f.$el.addClass(d.placeholder).val(f.inPlaceholder))}return!!c},f.accept=function(){return f.close(!0)},f.checkClose=function(b){if(!f.opening){f.escClose(b);var c=a.keyboard.css,d=a(b.target);if(d.hasClass(c.input)){var e=d.data("keyboard");e!==f||e.$el.hasClass(c.isCurrent)||b.type!==e.options.openOn||e.focusOn()}}},f.escClose=function(c){if(c&&"keyup"===c.type)return c.which!==b.keyCodes.escape||e.ignoreEsc?"":f.close(e.autoAccept&&e.autoAcceptOnEsc?"true":!1);if(f.isOpen&&(!f.isCurrent()&&f.isOpen||f.isOpen&&c.target!==f.el)){if((e.stayOpen||e.userClosed)&&!a(c.target).hasClass(b.css.input))return;b.allie&&c.preventDefault(),f.close(e.autoAccept?"true":!1)}},f.keyBtn=a("<button />").attr({role:"button",type:"button","aria-disabled":"false",tabindex:"-1"}).addClass(b.css.keyButton),f.processName=function(a){var b,c,d=(a||"").replace(/[^a-z0-9-_]/gi,""),e=d.length,f=[];if(e>1&&a===d)return a;if(e=a.length){for(b=0;e>b;b++)c=a[b],f.push(/[a-z0-9-_]/i.test(c)?/[-_]/.test(c)&&0!==b?"":c:(0===b?"":"-")+c.charCodeAt(0));return f.join("")}return a},f.processKeys=function(b){var c,d=b.split(":"),e={name:null,map:"",title:""};return/\(.+\)/.test(d[0])||/^:\(.+\)/.test(b)||/\([(:)]\)/.test(b)?/\([(:)]\)/.test(b)?(c=d[0].match(/([^(]+)\((.+)\)/),c&&c.length?(e.name=c[1],e.map=c[2],e.title=d.length>1?d.slice(1).join(":"):""):(e.name=b.match(/([^(]+)/)[0],":"===e.name&&(d=d.slice(1)),null===c&&(e.map=":",d=d.slice(2)),e.title=d.length?d.join(":"):"")):(e.map=b.match(/\(([^()]+?)\)/)[1],b=b.replace(/\(([^()]+)\)/,""),c=b.split(":"),""===c[0]?(e.name=":",d=d.slice(1)):e.name=c[0],e.title=d.length>1?d.slice(1).join(":"):""):(""===d[0]?(e.name=":",d=d.slice(1)):e.name=d[0],e.title=d.length>1?d.slice(1).join(":"):""),e.title=a.trim(e.title).replace(/_/g," "),e},f.addKey=function(a,c,d){var g,h,i,j={},k=f.processKeys(d?a:c),l=b.css;return!d&&e.display[k.name]?(i=f.processKeys(e.display[k.name]),i.action=f.processKeys(a).name):(i=k,i.action=k.name),j.name=f.processName(k.name),""!==i.map?(b.builtLayouts[f.layout].mappedKeys[i.map]=i.name,b.builtLayouts[f.layout].acceptedKeys.push(i.name)):d&&b.builtLayouts[f.layout].acceptedKeys.push(i.name),g=d?""===j.name?"":l.keyPrefix+j.name:l.keyAction+" "+l.keyPrefix+i.action,g+=(i.name.length>2?" "+l.keyWide:"")+" "+e.css.buttonDefault,j.html='<span class="'+l.keyText+'">'+i.name.replace(/[\u00A0-\u9999]/gim,function(a){return"&#"+a.charCodeAt(0)+";"})+"</span>",j.$key=f.keyBtn.clone().attr({"data-value":d?i.name:i.action,"data-name":i.action,"data-pos":f.temp[1]+","+f.temp[2],"data-action":i.action,"data-html":j.html}).addClass(g).html(j.html).appendTo(f.temp[0]),i.map&&j.$key.attr("data-mapped",i.map),(i.title||k.title)&&j.$key.attr({"data-title":k.title||i.title,title:k.title||i.title}),"function"==typeof e.buildKey&&(j=e.buildKey(f,j),h=j.$key.html(),j.$key.attr("data-html",h)),j.$key},f.customHash=function(a){var b,c,d,f,g,h=[],i=[];a="undefined"==typeof a?e.customLayout:a;for(c in a)a.hasOwnProperty(c)&&h.push(a[c]);if(i=i.concat.apply(i,h).join(" "),d=0,g=i.length,0===g)return d;for(b=0;g>b;b++)f=i.charCodeAt(b),d=(d<<5)-d+f,d&=d;return d},f.buildKeyboard=function(c,d){a.isEmptyObject(e.display)&&f.updateLanguage();var g,h,i,j=b.css,k=0,l=b.builtLayouts[c||f.layout||e.layout]={mappedKeys:{},acceptedKeys:[]},m=l.acceptedKeys=e.restrictInclude?(""+e.restrictInclude).split(/\s+/)||[]:[],n=j.keyboard+" "+e.css.popup+" "+e.css.container+(e.alwaysOpen||e.userClosed?" "+j.alwaysOpen:""),o=a("<div />").addClass(n).attr({role:"textbox"}).hide();return d&&"custom"===e.layout||!b.layouts.hasOwnProperty(e.layout)?(e.layout="custom",n=b.layouts.custom=e.customLayout||{normal:["{cancel}"]}):n=b.layouts[d?e.layout:c||f.layout||e.layout],a.each(n,function(b,c){if(""!==b&&!/^(name|lang|rtl)$/i.test(b))for("default"===b&&(b="normal"),k++,h=a("<div />").attr("name",b).addClass(j.keySet+" "+j.keySet+"-"+b).appendTo(o).toggle("normal"===b),g=0;g<c.length;g++)i=a.trim(c[g]).replace(/\{(\.?)[\s+]?:[\s+]?(\.?)\}/g,"{$1:$2}"),f.buildRow(h,g,i.split(/\s+/),m),h.find("."+j.keyButton+",."+j.keySpacer).filter(":last").after('<br class="'+j.endRow+'"/>')}),k>1&&(f.sets=!0),l.hasMappedKeys=!a.isEmptyObject(l.mappedKeys),l.$keyboard=o,o},f.buildRow=function(c,d,g,h){var i,j,k,l,m,n,o=b.css;for(k=0;k<g.length;k++)if(f.temp=[c,d,k],l=!1,0!==g[k].length)if(/^\{\S+\}$/.test(g[k])){if(m=g[k].match(/^\{(\S+)\}$/)[1],/\!\!/.test(m)&&(m=m.replace("!!",""),l=!0),/^sp:((\d+)?([\.|,]\d+)?)(em|px)?$/i.test(m)&&(n=parseFloat(m.replace(/,/,".").match(/^sp:((\d+)?([\.|,]\d+)?)(em|px)?$/i)[1]||0),a('<span class="'+o.keyText+'"></span>').width(m.match(/px/i)?n+"px":2*n+"em").addClass(o.keySpacer).appendTo(c)),/^empty(:((\d+)?([\.|,]\d+)?)(em|px)?)?$/i.test(m)&&(n=/:/.test(m)?parseFloat(m.replace(/,/,".").match(/^empty:((\d+)?([\.|,]\d+)?)(em|px)?$/i)[1]||0):"",f.addKey(""," ").addClass(e.css.buttonDisabled+" "+e.css.buttonEmpty).attr("aria-disabled",!0).width(n?m.match("px")?n+"px":2*n+"em":"")),/^meta\d+\:?(\w+)?/i.test(m)){f.addKey(m.split(":")[0],m).addClass(o.keyHasActive);continue}switch(j=m.split(":"),j[0].toLowerCase()){case"a":case"accept":f.addKey("accept",m).addClass(e.css.buttonAction+" "+o.keyAction);break;case"alt":case"altgr":f.addKey("alt",m).addClass(o.keyHasActive);break;case"b":case"bksp":f.addKey("bksp",m);break;case"c":case"cancel":f.addKey("cancel",m).addClass(e.css.buttonAction+" "+o.keyAction);break;case"combo":f.addKey("combo",m).addClass(o.keyHasActive).attr("title",function(a,b){return b+" "+e.display[e.useCombos?"active":"disabled"]}).toggleClass(e.css.buttonActive,e.useCombos);break;case"dec":h.push(f.decimal?".":","),f.addKey("dec",m);break;case"e":case"enter":f.addKey("enter",m).addClass(e.css.buttonAction+" "+o.keyAction);break;case"lock":f.addKey("lock",m).addClass(o.keyHasActive);break;case"s":case"shift":f.addKey("shift",m).addClass(o.keyHasActive);break;case"sign":h.push("-"),f.addKey("sign",m);break;case"space":h.push(" "),f.addKey("space",m);break;case"t":case"tab":f.addKey("tab",m);break;default:b.keyaction.hasOwnProperty(j[0])&&f.addKey(j[0],m).toggleClass(e.css.buttonAction+" "+o.keyAction,l)}}else i=g[k],f.addKey(i,i,!0)},f.removeBindings=function(b){a(document).unbind(b),f.el.ownerDocument!==document&&a(f.el.ownerDocument).unbind(b),a(window).unbind(b),f.$el.unbind(b)},f.removeKeyboard=function(){f.$allKeys=null,f.$decBtn=null,e.usePreview&&f.$preview.removeData("keyboard"),f.preview=null,f.$preview=null,f.$previewCopy=null,f.$keyboard.removeData("keyboard"),f.$keyboard.remove(),f.$keyboard=[],f.isOpen=!1,f.isCurrent(!1)},f.destroy=function(a){var c,d=b.css,g=f.extensionNamespace.length,h=[d.input,d.locked,d.placeholder,d.noKeyboard,d.alwaysOpen,e.css.input,d.isCurrent].join(" ");for(clearTimeout(f.timer),clearTimeout(f.timer2),f.$keyboard.length&&f.removeKeyboard(),f.removeBindings(f.namespace),f.removeBindings(f.namespace+"callbacks"),c=0;g>c;c++)f.removeBindings(f.extensionNamespace[c]);f.el.active=!1,f.$el.removeClass(h).removeAttr("aria-haspopup").removeAttr("role").removeData("keyboard"),f=null,"function"==typeof a&&a()},f.init()};return b.keyCodes={backSpace:8,tab:9,enter:13,capsLock:20,escape:27,space:32,pageUp:33,pageDown:34,end:35,home:36,left:37,up:38,right:39,down:40,insert:45,"delete":46,A:65,Z:90,V:86,C:67,X:88,a:97,z:122},b.css={idSuffix:"_keyboard",input:"ui-keyboard-input",inputClone:"ui-keyboard-preview-clone",wrapper:"ui-keyboard-preview-wrapper",preview:"ui-keyboard-preview",keyboard:"ui-keyboard",keySet:"ui-keyboard-keyset",keyButton:"ui-keyboard-button",keyWide:"ui-keyboard-widekey",keyPrefix:"ui-keyboard-",keyText:"ui-keyboard-text",keyHasActive:"ui-keyboard-hasactivestate",keyAction:"ui-keyboard-actionkey",keySpacer:"ui-keyboard-spacer",keyToggle:"ui-keyboard-toggle",keyDisabled:"ui-keyboard-disabled",locked:"ui-keyboard-lockedinput",alwaysOpen:"ui-keyboard-always-open",noKeyboard:"ui-keyboard-nokeyboard",placeholder:"ui-keyboard-placeholder",hasFocus:"ui-keyboard-has-focus",isCurrent:"ui-keyboard-input-current",inputValid:"ui-keyboard-valid-input",inputInvalid:"ui-keyboard-invalid-input",inputAutoAccepted:"ui-keyboard-autoaccepted",endRow:"ui-keyboard-button-endrow"},b.events={kbChange:"keyboardChange",kbBeforeClose:"beforeClose",kbBeforeVisible:"beforeVisible",kbVisible:"visible",kbInit:"initialized",kbInactive:"inactive",kbHidden:"hidden",kbRepeater:"repeater",kbKeysetChange:"keysetChange",inputAccepted:"accepted",inputCanceled:"canceled",inputChange:"change",inputRestricted:"restricted"},b.keyaction={accept:function(a){return a.close(!0),!1},alt:function(a){a.altActive=!a.altActive,a.showSet()},bksp:function(a){a.insertText("\b")},cancel:function(a){return a.close(),!1},clear:function(a){a.$preview.val(""),a.$decBtn.length&&a.checkDecimal()},combo:function(a){var c=a.options,d=!c.useCombos,e=a.$keyboard.find("."+b.css.keyPrefix+"combo");return c.useCombos=d,e.toggleClass(c.css.buttonActive,d).attr("title",e.attr("data-title")+" ("+c.display[d?"active":"disabled"]+")"),d&&a.checkCombos(),!1},dec:function(a){a.insertText(a.decimal?".":",")},del:function(a){a.insertText("{d}")},"default":function(a){a.shiftActive=a.altActive=a.metaActive=!1,a.showSet()},enter:function(c,d,e){var f=c.el.nodeName,g=c.options;return e.shiftKey?g.enterNavigation?c.switchInput(!e[g.enterMod],!0):c.close(!0):g.enterNavigation&&("TEXTAREA"!==f||e[g.enterMod])?c.switchInput(!e[g.enterMod],g.autoAccept?"true":!1):void("TEXTAREA"===f&&a(e.target).closest("button").length&&c.insertText((b.msie?" ":"")+"\n"))},lock:function(a){a.last.keyset[0]=a.shiftActive=a.capsLock=!a.capsLock,a.showSet()},left:function(a){var c=b.caret(a.$preview);c.start-1>=0&&(a.last.start=a.last.end=c.start-1,b.caret(a.$preview,a.last),a.setScroll())},meta:function(b,c){var d=a(c);b.metaActive=!d.hasClass(b.options.css.buttonActive),b.showSet(d.attr("data-name"))},next:function(a){return a.switchInput(!0,a.options.autoAccept),!1},normal:function(a){a.shiftActive=a.altActive=a.metaActive=!1,a.showSet()},prev:function(a){return a.switchInput(!1,a.options.autoAccept),!1},right:function(a){var c=b.caret(a.$preview);c.start+1<=a.$preview.val().length&&(a.last.start=a.last.end=c.start+1,b.caret(a.$preview,a.last),a.setScroll())},shift:function(a){a.last.keyset[0]=a.shiftActive=!a.shiftActive,a.showSet()},sign:function(a){/^\-?\d*\.?\d*$/.test(a.$preview.val())&&a.$preview.val(-1*a.$preview.val())},space:function(a){a.insertText(" ")},tab:function(a){var b=a.el.nodeName,c=a.options;return"INPUT"===b?c.tabNavigation?a.switchInput(!a.shiftActive,!0):!1:void a.insertText("	")},toggle:function(a){a.enabled=!a.enabled,
 a.toggle()},NBSP:" ",ZWSP:"​",ZWNJ:"‌",ZWJ:"‍",LRM:"‎",RLM:"‏"},b.builtLayouts={},b.layouts={alpha:{normal:["` 1 2 3 4 5 6 7 8 9 0 - = {bksp}","{tab} a b c d e f g h i j [ ] \\","k l m n o p q r s ; ' {enter}","{shift} t u v w x y z , . / {shift}","{accept} {space} {cancel}"],shift:["~ ! @ # $ % ^ & * ( ) _ + {bksp}","{tab} A B C D E F G H I J { } |",'K L M N O P Q R S : " {enter}',"{shift} T U V W X Y Z < > ? {shift}","{accept} {space} {cancel}"]},qwerty:{normal:["` 1 2 3 4 5 6 7 8 9 0 - = {bksp}","{tab} q w e r t y u i o p [ ] \\","a s d f g h j k l ; ' {enter}","{shift} z x c v b n m , . / {shift}","{accept} {space} {cancel}"],shift:["~ ! @ # $ % ^ & * ( ) _ + {bksp}","{tab} Q W E R T Y U I O P { } |",'A S D F G H J K L : " {enter}',"{shift} Z X C V B N M < > ? {shift}","{accept} {space} {cancel}"]},international:{normal:["` 1 2 3 4 5 6 7 8 9 0 - = {bksp}","{tab} q w e r t y u i o p [ ] \\","a s d f g h j k l ; ' {enter}","{shift} z x c v b n m , . / {shift}","{accept} {alt} {space} {alt} {cancel}"],shift:["~ ! @ # $ % ^ & * ( ) _ + {bksp}","{tab} Q W E R T Y U I O P { } |",'A S D F G H J K L : " {enter}',"{shift} Z X C V B N M < > ? {shift}","{accept} {alt} {space} {alt} {cancel}"],alt:["~ ¡ ² ³ ¤ € ¼ ½ ¾ ‘ ’ ¥ × {bksp}","{tab} ä å é ® þ ü ú í ó ö « » ¬","á ß ð f g h j k ø ¶ ´ {enter}","{shift} æ x © v b ñ µ ç > ¿ {shift}","{accept} {alt} {space} {alt} {cancel}"],"alt-shift":["~ ¹ ² ³ £ € ¼ ½ ¾ ‘ ’ ¥ ÷ {bksp}","{tab} Ä Å É ® Þ Ü Ú Í Ó Ö « » ¦","Ä § Ð F G H J K Ø ° ¨ {enter}","{shift} Æ X ¢ V B Ñ µ Ç . ¿ {shift}","{accept} {alt} {space} {alt} {cancel}"]},colemak:{normal:["` 1 2 3 4 5 6 7 8 9 0 - = {bksp}","{tab} q w f p g j l u y ; [ ] \\","{bksp} a r s t d h n e i o ' {enter}","{shift} z x c v b k m , . / {shift}","{accept} {space} {cancel}"],shift:["~ ! @ # $ % ^ & * ( ) _ + {bksp}","{tab} Q W F P G J L U Y : { } |",'{bksp} A R S T D H N E I O " {enter}',"{shift} Z X C V B K M < > ? {shift}","{accept} {space} {cancel}"]},dvorak:{normal:["` 1 2 3 4 5 6 7 8 9 0 [ ] {bksp}","{tab} ' , . p y f g c r l / = \\","a o e u i d h t n s - {enter}","{shift} ; q j k x b m w v z {shift}","{accept} {space} {cancel}"],shift:["~ ! @ # $ % ^ & * ( ) { } {bksp}",'{tab} " < > P Y F G C R L ? + |',"A O E U I D H T N S _ {enter}","{shift} : Q J K X B M W V Z {shift}","{accept} {space} {cancel}"]},num:{normal:["= ( ) {b}","{clear} / * -","7 8 9 +","4 5 6 {sign}","1 2 3 %","0 {dec} {a} {c}"]}},b.language={en:{display:{a:"✔:Accept (Shift+Enter)",accept:"Accept:Accept (Shift+Enter)",alt:"Alt:⌥ AltGr",b:"⌫:Backspace",bksp:"Bksp:Backspace",c:"✖:Cancel (Esc)",cancel:"Cancel:Cancel (Esc)",clear:"C:Clear",combo:"ö:Toggle Combo Keys",dec:".:Decimal",e:"⏎:Enter",empty:" ",enter:"Enter:Enter ⏎",left:"←",lock:"Lock:⇪ Caps Lock",next:"Next ⇨",prev:"⇦ Prev",right:"→",s:"⇧:Shift",shift:"Shift:Shift",sign:"±:Change Sign",space:" :Space",t:"⇥:Tab",tab:"⇥ Tab:Tab",toggle:" ",valid:"valid",invalid:"invalid",active:"active",disabled:"disabled"},wheelMessage:"Use mousewheel to see other keys",comboRegex:/([`\'~\^\"ao])([a-z])/gim,combos:{"`":{a:"à",A:"À",e:"è",E:"È",i:"ì",I:"Ì",o:"ò",O:"Ò",u:"ù",U:"Ù",y:"ỳ",Y:"Ỳ"},"'":{a:"á",A:"Á",e:"é",E:"É",i:"í",I:"Í",o:"ó",O:"Ó",u:"ú",U:"Ú",y:"ý",Y:"Ý"},'"':{a:"ä",A:"Ä",e:"ë",E:"Ë",i:"ï",I:"Ï",o:"ö",O:"Ö",u:"ü",U:"Ü",y:"ÿ",Y:"Ÿ"},"^":{a:"â",A:"Â",e:"ê",E:"Ê",i:"î",I:"Î",o:"ô",O:"Ô",u:"û",U:"Û",y:"ŷ",Y:"Ŷ"},"~":{a:"ã",A:"Ã",e:"ẽ",E:"Ẽ",i:"ĩ",I:"Ĩ",o:"õ",O:"Õ",u:"ũ",U:"Ũ",y:"ỹ",Y:"Ỹ",n:"ñ",N:"Ñ"}}}},b.defaultOptions={language:null,rtl:!1,layout:"qwerty",customLayout:null,position:{of:null,my:"center top",at:"center top",at2:"center bottom"},reposition:!0,usePreview:!0,alwaysOpen:!1,initialFocus:!0,noFocus:!1,stayOpen:!1,ignoreEsc:!1,css:{input:"ui-widget-content ui-corner-all",container:"ui-widget-content ui-widget ui-corner-all ui-helper-clearfix",popup:"",buttonDefault:"ui-state-default ui-corner-all",buttonHover:"ui-state-hover",buttonAction:"ui-state-active",buttonActive:"ui-state-active",buttonDisabled:"ui-state-disabled",buttonEmpty:"ui-keyboard-empty"},autoAccept:!1,autoAcceptOnEsc:!1,lockInput:!1,restrictInput:!1,restrictInclude:"",acceptValid:!1,cancelClose:!0,tabNavigation:!1,enterNavigation:!1,enterMod:"altKey",stopAtEnd:!0,appendLocally:!1,appendTo:"body",stickyShift:!0,preventPaste:!1,caretToEnd:!1,scrollAdjustment:10,maxLength:!1,maxInsert:!0,repeatDelay:500,repeatRate:20,resetDefault:!0,openOn:"focus",keyBinding:"mousedown touchstart",useWheel:!0,useCombos:!0,validate:function(a,b,c){return!0}},b.comboRegex=/([`\'~\^\"ao])([a-z])/gim,b.currentKeyboard="",a('<!--[if lte IE 8]><script>jQuery("body").addClass("oldie");</script><![endif]--><!--[if IE]><script>jQuery("body").addClass("ie");</script><![endif]-->').appendTo("body").remove(),b.msie=a("body").hasClass("oldie"),b.allie=a("body").hasClass("ie"),b.watermark="undefined"!=typeof document.createElement("input").placeholder,b.checkCaretSupport=function(){if("boolean"!=typeof b.checkCaret){var c=a('<div style="height:0px;width:0px;overflow:hidden;position:fixed;top:0;left:-100px;"><input type="text" value="testing"/></div>').prependTo("body");b.caret(c.find("input"),3,3),b.checkCaret=3!==b.caret(c.find("input").hide().show()).start,c.remove()}return b.checkCaret},b.caret=function(a,b,c){if(!a||!a.length||a.is(":hidden")||"hidden"===a.css("visibility"))return{};var d,e,f,g,h=a.data("keyboard"),i=h&&h.options.noFocus;return i||a.focus(),"undefined"!=typeof b?("object"==typeof b&&"start"in b&&"end"in b?(d=b.start,e=b.end):"undefined"==typeof c&&(c=b),"number"==typeof b&&"number"==typeof c?(d=b,e=c):"start"===b?d=e=0:"string"==typeof b&&(d=e=a.val().length),a.caret(d,e,i)):(g=a.caret(),d=g.start,e=g.end,f=a[0].value||a.text()||"",{start:d,end:e,text:f.substring(d,e),replaceStr:function(a){return f.substring(0,d)+a+f.substring(e,f.length)}})},a.fn.keyboard=function(b){return this.each(function(){a(this).data("keyboard")||new a.keyboard(this,b)})},a.fn.getkeyboard=function(){return this.data("keyboard")},a.fn.caret=function(a,b,c){if("undefined"==typeof this[0]||this.is(":hidden")||"hidden"===this.css("visibility"))return this;var d,e,f,g,h,i=document.selection,j=this,k=j[0],l=k.scrollTop,m=!1,n=!0;try{m="selectionStart"in k}catch(o){n=!1}return n&&"undefined"!=typeof a?(/(email|number)/i.test(k.type)||(m?(k.selectionStart=a,k.selectionEnd=b):(d=k.createTextRange(),d.collapse(!0),d.moveStart("character",a),d.moveEnd("character",b-a),d.select())),c||!j.is(":visible")&&"hidden"===j.css("visibility")||k.focus(),k.scrollTop=l,this):(/(email|number)/i.test(k.type)?a=b=j.val().length:m?(a=k.selectionStart,b=k.selectionEnd):i?"TEXTAREA"===k.nodeName?(h=j.val(),e=i.createRange(),f=e.duplicate(),f.moveToElementText(k),f.setEndPoint("EndToEnd",e),a=f.text.replace(/\r/g,"\n").length,b=a+e.text.replace(/\r/g,"\n").length):(h=j.val().replace(/\r/g,"\n"),e=i.createRange().duplicate(),e.moveEnd("character",h.length),a=""===e.text?h.length:h.lastIndexOf(e.text),e=i.createRange().duplicate(),e.moveStart("character",-h.length),b=e.text.length):a=b=(k.value||"").length,g=k.value||"",{start:a,end:b,text:g.substring(a,b),replace:function(c){return g.substring(0,a)+c+g.substring(b,g.length)}})},b});
@@ -7391,6 +6882,313 @@ TouchUI.prototype.DOM.overwrite.tabdrop = function() {
 ;
 
 $(function() {
+    function AnnouncementsViewModel(parameters) {
+        var self = this;
+
+        self.loginState = parameters[0];
+        self.settings = parameters[1];
+
+        self.channels = new ItemListHelper(
+            "plugin.announcements.channels",
+            {
+                "channel": function (a, b) {
+                    // sorts ascending
+                    if (a["channel"].toLocaleLowerCase() < b["channel"].toLocaleLowerCase()) return -1;
+                    if (a["channel"].toLocaleLowerCase() > b["channel"].toLocaleLowerCase()) return 1;
+                    return 0;
+                }
+            },
+            {
+            },
+            "name",
+            [],
+            [],
+            5
+        );
+
+        self.unread = ko.observable();
+        self.hiddenChannels = [];
+        self.channelNotifications = {};
+
+        self.announcementDialog = undefined;
+        self.announcementDialogContent = undefined;
+        self.announcementDialogTabs = undefined;
+
+        self.setupTabLink = function(item) {
+            $("a[data-toggle='tab']", item).on("show", self.resetContentScroll);
+        };
+
+        self.resetContentScroll = function() {
+            self.announcementDialogContent.scrollTop(0);
+        };
+
+        self.toggleButtonCss = function(data) {
+            var icon = data.enabled ? "icon-circle" : "icon-circle-blank";
+            var disabled = (self.enableToggle(data)) ? "" : " disabled";
+
+            return icon + disabled;
+        };
+
+        self.toggleButtonTitle = function(data) {
+            return data.forced ? gettext("Cannot be toggled") : (data.enabled ? gettext("Disable Channel") : gettext("Enable Channel"));
+        };
+
+        self.enableToggle = function(data) {
+            return !data.forced;
+        };
+
+        self.markRead = function(channel, until) {
+            if (!self.loginState.isAdmin()) return;
+
+            var url = PLUGIN_BASEURL + "announcements/channels/" + channel;
+
+            var payload = {
+                command: "read",
+                until: until
+            };
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify(payload),
+                contentType: "application/json; charset=UTF-8",
+                success: function() {
+                    self.retrieveData()
+                }
+            })
+        };
+
+        self.toggleChannel = function(channel) {
+            if (!self.loginState.isAdmin()) return;
+
+            var url = PLUGIN_BASEURL + "announcements/channels/" + channel;
+
+            var payload = {
+                command: "toggle"
+            };
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify(payload),
+                contentType: "application/json; charset=UTF-8",
+                success: function() {
+                    self.retrieveData()
+                }
+            })
+        };
+
+        self.refreshAnnouncements = function() {
+            self.retrieveData(true);
+        };
+
+        self.retrieveData = function(force) {
+            if (!self.loginState.isAdmin()) return;
+
+            var url = PLUGIN_BASEURL + "announcements/channels";
+            if (force) {
+                url += "?force=true";
+            }
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                dataType: "json",
+                success: function(data) {
+                    self.fromResponse(data);
+                }
+            });
+        };
+
+        self.fromResponse = function(data) {
+            var currentTab = $("li.active a", self.announcementDialogTabs).attr("href");
+
+            var unread = 0;
+            var channels = [];
+            _.each(data, function(value, key) {
+                value.key = key;
+                value.last = value.data.length ? value.data[0].published : undefined;
+                value.count = value.data.length;
+                unread += value.unread;
+                channels.push(value);
+            });
+            self.channels.updateItems(channels);
+            self.unread(unread);
+
+            self.displayAnnouncements(channels);
+
+            self.selectTab(currentTab);
+        };
+
+        self.showAnnouncementDialog = function(channel) {
+            self.announcementDialogContent.scrollTop(0);
+
+            if (!self.announcementDialog.hasClass("in")) {
+                self.announcementDialog.modal({
+                    minHeight: function() { return Math.max($.fn.modal.defaults.maxHeight() - 80, 250); }
+                }).css({
+                    width: 'auto',
+                    'margin-left': function() { return -($(this).width() /2); }
+                });
+            }
+
+            var tab = undefined;
+            if (channel) {
+                tab = "#plugin_announcements_dialog_channel_" + channel;
+            }
+            self.selectTab(tab);
+
+            return false;
+        };
+
+        self.selectTab = function(tab) {
+            if (tab != undefined) {
+                if (!_.startsWith(tab, "#")) {
+                    tab = "#" + tab;
+                }
+                $('a[href="' + tab + '"]', self.announcementDialogTabs).tab("show");
+            } else {
+                $('a:first', self.announcementDialogTabs).tab("show");
+            }
+        };
+
+        self.displayAnnouncements = function(channels) {
+            var displayLimit = self.settings.settings.plugins.announcements.display_limit();
+            var maxLength = self.settings.settings.plugins.announcements.summary_limit();
+
+            var cutAfterNewline = function(text) {
+                text = text.trim();
+
+                var firstNewlinePos = text.indexOf("\n");
+                if (firstNewlinePos > 0) {
+                    text = text.substr(0, firstNewlinePos).trim();
+                }
+
+                return text;
+            };
+
+            var stripParagraphs = function(text) {
+                if (_.startsWith(text, "<p>")) {
+                    text = text.substr("<p>".length);
+                }
+                if (_.endsWith(text, "</p>")) {
+                    text = text.substr(0, text.length - "</p>".length);
+                }
+
+                return text.replace(/<\/p>\s*<p>/ig, "<br>");
+            };
+
+            _.each(channels, function(value) {
+                var key = value.key;
+                var channel = value.channel;
+                var priority = value.priority;
+                var items = value.data;
+
+                if ($.inArray(key, self.hiddenChannels) > -1) {
+                    // channel currently ignored
+                    return;
+                }
+
+                var newItems = _.filter(items, function(entry) { return !entry.read; });
+                if (newItems.length == 0) {
+                    // no new items at all, we don't display anything for this channel
+                    return;
+                }
+
+                var displayedItems;
+                if (newItems.length > displayLimit) {
+                    displayedItems = newItems.slice(0, displayLimit);
+                } else {
+                    displayedItems = newItems;
+                }
+                var rest = newItems.length - displayedItems.length;
+
+                var text = "<ul>";
+                _.each(displayedItems, function(item) {
+                    var limitedSummary = stripParagraphs(item.summary_without_images.trim());
+                    if (limitedSummary.length > maxLength) {
+                        limitedSummary = limitedSummary.substr(0, maxLength);
+                        limitedSummary = limitedSummary.substr(0, Math.min(limitedSummary.length, limitedSummary.lastIndexOf(" ")));
+                        limitedSummary += "...";
+                    }
+
+                    text += "<li><a href='" + item.link + "' target='_blank' rel='noreferrer noopener'>" + cutAfterNewline(item.title) + "</a><br><small>" + formatTimeAgo(item.published) + "</small><p>" + limitedSummary + "</p></li>";
+                });
+                text += "</ul>";
+
+                if (rest) {
+                    text += gettext(_.sprintf("... and %(rest)d more.", {rest: rest}));
+                }
+
+                var options = {
+                    title: channel,
+                    text: text,
+                    hide: false,
+                    confirm: {
+                        confirm: true,
+                        buttons: [{
+                            text: gettext("Later"),
+                            click: function(notice) {
+                                self.hiddenChannels.push(key);
+                                notice.remove();
+                            }
+                        }, {
+                            text: gettext("Mark read"),
+                            click: function(notice) {
+                                self.markRead(key, value.last);
+                                notice.remove();
+                            }
+                        }, {
+                            text: gettext("Read..."),
+                            addClass: "btn-primary",
+                            click: function(notice) {
+                                self.showAnnouncementDialog(key);
+                                self.markRead(key, value.last);
+                                notice.remove();
+                            }
+                        }]
+                    },
+                    buttons: {
+                        sticker: false,
+                        closer: false
+                    }
+                };
+
+                if (priority == 1) {
+                    options.type = "error";
+                }
+
+                if (self.channelNotifications[key]) {
+                    self.channelNotifications[key].remove();
+                }
+                self.channelNotifications[key] = new PNotify(options);
+            });
+        };
+
+        self.onUserLoggedIn = function() {
+            self.retrieveData();
+        };
+
+        self.onStartup = function() {
+            self.announcementDialog = $("#plugin_announcements_dialog");
+            self.announcementDialogContent = $("#plugin_announcements_dialog_content");
+            self.announcementDialogTabs = $("#plugin_announcements_dialog_tabs");
+        }
+    }
+
+    // view model class, parameters for constructor, container to bind to
+    ADDITIONAL_VIEWMODELS.push([
+        AnnouncementsViewModel,
+        ["loginStateViewModel", "settingsViewModel"],
+        ["#plugin_announcements_dialog", "#settings_plugin_announcements", "#navbar_plugin_announcements"]
+    ]);
+});
+
+;
+
+$(function() {
     function CuraViewModel(parameters) {
         var self = this;
 
@@ -7585,6 +7383,515 @@ $(function() {
         "#settings_plugin_cura"
     ]);
 });
+;
+
+$(function() {
+    function SoftwareUpdateViewModel(parameters) {
+        var self = this;
+
+        self.loginState = parameters[0];
+        self.printerState = parameters[1];
+        self.settings = parameters[2];
+        self.popup = undefined;
+
+        self.forceUpdate = false;
+
+        self.updateInProgress = false;
+        self.waitingForRestart = false;
+        self.restartTimeout = undefined;
+
+        self.currentlyBeingUpdated = [];
+
+        self.octoprintUnconfigured = ko.observable();
+        self.octoprintUnreleased = ko.observable();
+
+        self.config_cacheTtl = ko.observable();
+        self.config_checkoutFolder = ko.observable();
+        self.config_checkType = ko.observable();
+
+        self.configurationDialog = $("#settings_plugin_softwareupdate_configurationdialog");
+        self.confirmationDialog = $("#softwareupdate_confirmation_dialog");
+
+        self.config_availableCheckTypes = [
+            {"key": "github_release", "name": gettext("Release")},
+            {"key": "git_commit", "name": gettext("Commit")}
+        ];
+
+        self.reloadOverlay = $("#reloadui_overlay");
+
+        self.versions = new ItemListHelper(
+            "plugin.softwareupdate.versions",
+            {
+                "name": function(a, b) {
+                    // sorts ascending, puts octoprint first
+                    if (a.key.toLocaleLowerCase() == "octoprint") return -1;
+                    if (b.key.toLocaleLowerCase() == "octoprint") return 1;
+
+                    if (a.displayName.toLocaleLowerCase() < b.displayName.toLocaleLowerCase()) return -1;
+                    if (a.displayName.toLocaleLowerCase() > b.displayName.toLocaleLowerCase()) return 1;
+                    return 0;
+                }
+            },
+            {},
+            "name",
+            [],
+            [],
+            5
+        );
+
+        self.availableAndPossible = ko.computed(function() {
+            return _.filter(self.versions.items(), function(info) { return info.updateAvailable && info.updatePossible; });
+        });
+
+        self.onUserLoggedIn = function() {
+            self.performCheck();
+        };
+
+        self._showPopup = function(options, eventListeners) {
+            self._closePopup();
+            self.popup = new PNotify(options);
+
+            if (eventListeners) {
+                var popupObj = self.popup.get();
+                _.each(eventListeners, function(value, key) {
+                    popupObj.on(key, value);
+                })
+            }
+        };
+
+        self._updatePopup = function(options) {
+            if (self.popup === undefined) {
+                self._showPopup(options);
+            } else {
+                self.popup.update(options);
+            }
+        };
+
+        self._closePopup = function() {
+            if (self.popup !== undefined) {
+                self.popup.remove();
+            }
+        };
+
+        self.showPluginSettings = function() {
+            self._copyConfig();
+            self.configurationDialog.modal();
+        };
+
+        self.savePluginSettings = function() {
+            var data = {
+                plugins: {
+                    softwareupdate: {
+                        cache_ttl: parseInt(self.config_cacheTtl()),
+                        octoprint_checkout_folder: self.config_checkoutFolder(),
+                        octoprint_type: self.config_checkType()
+                    }
+                }
+            };
+            self.settings.saveData(data, function() {
+                self.configurationDialog.modal("hide");
+                self._copyConfig();
+                self.performCheck();
+            });
+        };
+
+        self._copyConfig = function() {
+            self.config_cacheTtl(self.settings.settings.plugins.softwareupdate.cache_ttl());
+            self.config_checkoutFolder(self.settings.settings.plugins.softwareupdate.octoprint_checkout_folder());
+            self.config_checkType(self.settings.settings.plugins.softwareupdate.octoprint_type());
+        };
+
+        self.fromCheckResponse = function(data, ignoreSeen, showIfNothingNew) {
+            var versions = [];
+            _.each(data.information, function(value, key) {
+                value["key"] = key;
+
+                if (!value.hasOwnProperty("displayName") || value.displayName == "") {
+                    value.displayName = value.key;
+                }
+                if (!value.hasOwnProperty("displayVersion") || value.displayVersion == "") {
+                    value.displayVersion = value.information.local.name;
+                }
+                if (!value.hasOwnProperty("releaseNotes") || value.releaseNotes == "") {
+                    value.releaseNotes = undefined;
+                }
+
+                var fullNameTemplate = gettext("%(name)s: %(version)s");
+                value.fullNameLocal = _.sprintf(fullNameTemplate, {name: value.displayName, version: value.displayVersion});
+
+                var fullNameRemoteVars = {name: value.displayName, version: gettext("unknown")};
+                if (value.hasOwnProperty("information") && value.information.hasOwnProperty("remote") && value.information.remote.hasOwnProperty("name")) {
+                    fullNameRemoteVars.version = value.information.remote.name;
+                }
+                value.fullNameRemote = _.sprintf(fullNameTemplate, fullNameRemoteVars);
+
+                versions.push(value);
+            });
+            self.versions.updateItems(versions);
+
+            var octoprint = data.information["octoprint"];
+            if (octoprint && octoprint.hasOwnProperty("check")) {
+                var check = octoprint.check;
+                if (BRANCH != "master" && check["type"] == "github_release") {
+                    self.octoprintUnreleased(true);
+                } else {
+                    self.octoprintUnreleased(false);
+                }
+
+                var checkoutFolder = (check["checkout_folder"] || "").trim();
+                var updateFolder = (check["update_folder"] || "").trim();
+                var checkType = check["type"] || "";
+                if ((checkType == "github_release" || checkType == "git_commit") && checkoutFolder == "" && updateFolder == "") {
+                    self.octoprintUnconfigured(true);
+                } else {
+                    self.octoprintUnconfigured(false);
+                }
+            }
+
+            if (data.status == "updateAvailable" || data.status == "updatePossible") {
+                var text = "<div class='softwareupdate_notification'>" + gettext("There are updates available for the following components:");
+
+                text += "<ul class='icons-ul'>";
+                _.each(self.versions.items(), function(update_info) {
+                    if (update_info.updateAvailable) {
+                        text += "<li>"
+                            + "<i class='icon-li " + (update_info.updatePossible ? "icon-ok" : "icon-remove")+ "'></i>"
+                            + "<span class='name' title='" + update_info.fullNameRemote + "'>" + update_info.fullNameRemote + "</span>"
+                            + (update_info.releaseNotes ? "<a href=\"" +  update_info.releaseNotes + "\" target=\"_blank\">" + gettext("Release Notes") + "</a>" : "")
+                            + "</li>";
+                    }
+                });
+                text += "</ul>";
+
+                text += "<small>" + gettext("Those components marked with <i class=\"icon-ok\"></i> can be updated directly.") + "</small>";
+
+                text += "</div>";
+
+                var options = {
+                    title: gettext("Update Available"),
+                    text: text,
+                    hide: false
+                };
+                var eventListeners = {};
+
+                if (data.status == "updatePossible" && self.loginState.isAdmin()) {
+                    // if user is admin, add action buttons
+                    options["confirm"] = {
+                        confirm: true,
+                        buttons: [{
+                            text: gettext("Ignore"),
+                            click: function() {
+                                self._markNotificationAsSeen(data.information);
+                                self._showPopup({
+                                    text: gettext("You can make this message display again via \"Settings\" > \"Software Update\" > \"Check for update now\"")
+                                });
+                            }
+                        }, {
+                            text: gettext("Update now"),
+                            addClass: "btn-primary",
+                            click: self.update
+                        }]
+                    };
+                    options["buttons"] = {
+                        closer: false,
+                        sticker: false
+                    };
+                }
+
+                if (ignoreSeen || !self._hasNotificationBeenSeen(data.information)) {
+                    self._showPopup(options, eventListeners);
+                }
+            } else if (data.status == "current") {
+                if (showIfNothingNew) {
+                    self._showPopup({
+                        title: gettext("Everything is up-to-date"),
+                        hide: false,
+                        type: "success"
+                    });
+                } else {
+                    self._closePopup();
+                }
+            }
+        };
+
+        self.performCheck = function(showIfNothingNew, force, ignoreSeen) {
+            if (!self.loginState.isUser()) return;
+
+            var url = PLUGIN_BASEURL + "softwareupdate/check";
+            if (force) {
+                url += "?force=true";
+            }
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                dataType: "json",
+                success: function(data) {
+                    self.fromCheckResponse(data, ignoreSeen, showIfNothingNew);
+                }
+            });
+        };
+
+        self._markNotificationAsSeen = function(data) {
+            if (!Modernizr.localstorage)
+                return false;
+            localStorage["plugin.softwareupdate.seen_information"] = JSON.stringify(self._informationToRemoteVersions(data));
+        };
+
+        self._hasNotificationBeenSeen = function(data) {
+            if (!Modernizr.localstorage)
+                return false;
+
+            if (localStorage["plugin.softwareupdate.seen_information"] == undefined)
+                return false;
+
+            var knownData = JSON.parse(localStorage["plugin.softwareupdate.seen_information"]);
+            var freshData = self._informationToRemoteVersions(data);
+
+            var hasBeenSeen = true;
+            _.each(freshData, function(value, key) {
+                if (!_.has(knownData, key) || knownData[key] != freshData[key]) {
+                    hasBeenSeen = false;
+                }
+            });
+            return hasBeenSeen;
+        };
+
+        self._informationToRemoteVersions = function(data) {
+            var result = {};
+            _.each(data, function(value, key) {
+                result[key] = value.information.remote.value;
+            });
+            return result;
+        };
+
+        self.performUpdate = function(force, items) {
+            self.updateInProgress = true;
+
+            var options = {
+                title: gettext("Updating..."),
+                text: gettext("Now updating, please wait."),
+                icon: "icon-cog icon-spin",
+                hide: false,
+                buttons: {
+                    closer: false,
+                    sticker: false
+                }
+            };
+            self._showPopup(options);
+
+            var postData = {
+                force: (force == true)
+            };
+            if (items != undefined) {
+                postData.check = items;
+            }
+
+            $.ajax({
+                url: PLUGIN_BASEURL + "softwareupdate/update",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify(postData),
+                error: function() {
+                    self.updateInProgress = false;
+                    self._showPopup({
+                        title: gettext("Update not started!"),
+                        text: gettext("The update could not be started. Is it already active? Please consult the log for details."),
+                        type: "error",
+                        hide: false,
+                        buttons: {
+                            sticker: false
+                        }
+                    });
+                },
+                success: function(data) {
+                    self.currentlyBeingUpdated = data.checks;
+                }
+            });
+        };
+
+        self.update = function(force) {
+            if (self.updateInProgress) return;
+            if (!self.loginState.isAdmin()) return;
+
+            if (self.printerState.isPrinting()) {
+                self._showPopup({
+                    title: gettext("Can't update while printing"),
+                    text: gettext("A print job is currently in progress. Updating will be prevented until it is done."),
+                    type: "error"
+                });
+            } else {
+                self.forceUpdate = (force == true);
+                self.confirmationDialog.modal("show");
+            }
+
+        };
+
+        self.confirmUpdate = function() {
+            self.confirmationDialog.hide();
+            self.performUpdate(self.forceUpdate,
+                               _.map(self.availableAndPossible(), function(info) { return info.key }));
+        };
+
+        self.onServerDisconnect = function() {
+            if (self.restartTimeout !== undefined) {
+                clearTimeout(self.restartTimeout);
+            }
+            return true;
+        };
+
+        self.onDataUpdaterReconnect = function() {
+            if (self.waitingForRestart) {
+                self.waitingForRestart = false;
+                self.updateInProgress = false;
+                if (!self.reloadOverlay.is(":visible")) {
+                    self.reloadOverlay.show();
+                }
+            }
+        };
+
+        self.onDataUpdaterPluginMessage = function(plugin, data) {
+            if (plugin != "softwareupdate") {
+                return;
+            }
+
+            var messageType = data.type;
+            var messageData = data.data;
+
+            var options = undefined;
+
+            switch (messageType) {
+                case "updating": {
+                    console.log(JSON.stringify(messageData));
+
+                    var name = self.currentlyBeingUpdated[messageData.target];
+                    if (name == undefined) {
+                        name = messageData.target;
+                    }
+
+                    self._updatePopup({
+                        text: _.sprintf(gettext("Now updating %(name)s to %(version)s"), {name: name, version: messageData.version})
+                    });
+                    break;
+                }
+                case "restarting": {
+                    console.log(JSON.stringify(messageData));
+
+                    options = {
+                        title: gettext("Update successful, restarting!"),
+                        text: gettext("The update finished successfully and the server will now be restarted."),
+                        type: "success",
+                        hide: false,
+                        buttons: {
+                            sticker: false
+                        }
+                    };
+
+                    self.waitingForRestart = true;
+                    self.restartTimeout = setTimeout(function() {
+                        self._showPopup({
+                            title: gettext("Restart failed"),
+                            text: gettext("The server apparently did not restart by itself, you'll have to do it manually. Please consult the log file on what went wrong."),
+                            type: "error",
+                            hide: false,
+                            buttons: {
+                                sticker: false
+                            }
+                        });
+                        self.waitingForRestart = false;
+                    }, 60000);
+
+                    break;
+                }
+                case "restart_manually": {
+                    console.log(JSON.stringify(messageData));
+
+                    var restartType = messageData.restart_type;
+                    var text = gettext("The update finished successfully, please restart RaionPi now.");
+                    if (restartType == "environment") {
+                        text = gettext("The update finished successfully, please reboot the server now.");
+                    }
+
+                    options = {
+                        title: gettext("Update successful, restart required!"),
+                        text: text,
+                        type: "success",
+                        hide: false,
+                        buttons: {
+                            sticker: false
+                        }
+                    };
+                    self.updateInProgress = false;
+                    break;
+                }
+                case "restart_failed": {
+                    var restartType = messageData.restart_type;
+                    var text = gettext("Restarting RaionPi failed, please restart it manually. You might also want to consult the log file on what went wrong here.");
+                    if (restartType == "environment") {
+                        text = gettext("Rebooting the server failed, please reboot it manually. You might also want to consult the log file on what went wrong here.");
+                    }
+
+                    options = {
+                        title: gettext("Restart failed"),
+                        test: gettext("The server apparently did not restart by itself, you'll have to do it manually. Please consult the log file on what went wrong."),
+                        type: "error",
+                        hide: false,
+                        buttons: {
+                            sticker: false
+                        }
+                    };
+                    self.waitingForRestart = false;
+                    self.updateInProgress = false;
+                    break;
+                }
+                case "success": {
+                    options = {
+                        title: gettext("Update successful!"),
+                        text: gettext("The update finished successfully."),
+                        type: "success",
+                        hide: false,
+                        buttons: {
+                            sticker: false
+                        }
+                    };
+                    self.updateInProgress = false;
+                    break;
+                }
+                case "error": {
+                    self._showPopup({
+                        title: gettext("Update failed!"),
+                        text: gettext("The update did not finish successfully. Please consult the log for details."),
+                        type: "error",
+                        hide: false,
+                        buttons: {
+                            sticker: false
+                        }
+                    });
+                    self.updateInProgress = false;
+                    break;
+                }
+                case "update_versions": {
+                    self.performCheck();
+                    break;
+                }
+            }
+
+            if (options != undefined) {
+                self._showPopup(options);
+            }
+        };
+
+    }
+
+    // view model class, parameters for constructor, container to bind to
+    ADDITIONAL_VIEWMODELS.push([
+        SoftwareUpdateViewModel,
+        ["loginStateViewModel", "printerStateViewModel", "settingsViewModel"],
+        ["#settings_plugin_softwareupdate", "#softwareupdate_confirmation_dialog"]
+    ]);
+});
+
 ;
 
 $(function() {
@@ -8297,313 +8604,6 @@ $(function() {
 
     // view model class, parameters for constructor, container to bind to
     ADDITIONAL_VIEWMODELS.push([PluginManagerViewModel, ["loginStateViewModel", "settingsViewModel", "printerStateViewModel"], "#settings_plugin_pluginmanager"]);
-});
-
-;
-
-$(function() {
-    function AnnouncementsViewModel(parameters) {
-        var self = this;
-
-        self.loginState = parameters[0];
-        self.settings = parameters[1];
-
-        self.channels = new ItemListHelper(
-            "plugin.announcements.channels",
-            {
-                "channel": function (a, b) {
-                    // sorts ascending
-                    if (a["channel"].toLocaleLowerCase() < b["channel"].toLocaleLowerCase()) return -1;
-                    if (a["channel"].toLocaleLowerCase() > b["channel"].toLocaleLowerCase()) return 1;
-                    return 0;
-                }
-            },
-            {
-            },
-            "name",
-            [],
-            [],
-            5
-        );
-
-        self.unread = ko.observable();
-        self.hiddenChannels = [];
-        self.channelNotifications = {};
-
-        self.announcementDialog = undefined;
-        self.announcementDialogContent = undefined;
-        self.announcementDialogTabs = undefined;
-
-        self.setupTabLink = function(item) {
-            $("a[data-toggle='tab']", item).on("show", self.resetContentScroll);
-        };
-
-        self.resetContentScroll = function() {
-            self.announcementDialogContent.scrollTop(0);
-        };
-
-        self.toggleButtonCss = function(data) {
-            var icon = data.enabled ? "icon-circle" : "icon-circle-blank";
-            var disabled = (self.enableToggle(data)) ? "" : " disabled";
-
-            return icon + disabled;
-        };
-
-        self.toggleButtonTitle = function(data) {
-            return data.forced ? gettext("Cannot be toggled") : (data.enabled ? gettext("Disable Channel") : gettext("Enable Channel"));
-        };
-
-        self.enableToggle = function(data) {
-            return !data.forced;
-        };
-
-        self.markRead = function(channel, until) {
-            if (!self.loginState.isAdmin()) return;
-
-            var url = PLUGIN_BASEURL + "announcements/channels/" + channel;
-
-            var payload = {
-                command: "read",
-                until: until
-            };
-
-            $.ajax({
-                url: url,
-                type: "POST",
-                dataType: "json",
-                data: JSON.stringify(payload),
-                contentType: "application/json; charset=UTF-8",
-                success: function() {
-                    self.retrieveData()
-                }
-            })
-        };
-
-        self.toggleChannel = function(channel) {
-            if (!self.loginState.isAdmin()) return;
-
-            var url = PLUGIN_BASEURL + "announcements/channels/" + channel;
-
-            var payload = {
-                command: "toggle"
-            };
-
-            $.ajax({
-                url: url,
-                type: "POST",
-                dataType: "json",
-                data: JSON.stringify(payload),
-                contentType: "application/json; charset=UTF-8",
-                success: function() {
-                    self.retrieveData()
-                }
-            })
-        };
-
-        self.refreshAnnouncements = function() {
-            self.retrieveData(true);
-        };
-
-        self.retrieveData = function(force) {
-            if (!self.loginState.isAdmin()) return;
-
-            var url = PLUGIN_BASEURL + "announcements/channels";
-            if (force) {
-                url += "?force=true";
-            }
-
-            $.ajax({
-                url: url,
-                type: "GET",
-                dataType: "json",
-                success: function(data) {
-                    self.fromResponse(data);
-                }
-            });
-        };
-
-        self.fromResponse = function(data) {
-            var currentTab = $("li.active a", self.announcementDialogTabs).attr("href");
-
-            var unread = 0;
-            var channels = [];
-            _.each(data, function(value, key) {
-                value.key = key;
-                value.last = value.data.length ? value.data[0].published : undefined;
-                value.count = value.data.length;
-                unread += value.unread;
-                channels.push(value);
-            });
-            self.channels.updateItems(channels);
-            self.unread(unread);
-
-            self.displayAnnouncements(channels);
-
-            self.selectTab(currentTab);
-        };
-
-        self.showAnnouncementDialog = function(channel) {
-            self.announcementDialogContent.scrollTop(0);
-
-            if (!self.announcementDialog.hasClass("in")) {
-                self.announcementDialog.modal({
-                    minHeight: function() { return Math.max($.fn.modal.defaults.maxHeight() - 80, 250); }
-                }).css({
-                    width: 'auto',
-                    'margin-left': function() { return -($(this).width() /2); }
-                });
-            }
-
-            var tab = undefined;
-            if (channel) {
-                tab = "#plugin_announcements_dialog_channel_" + channel;
-            }
-            self.selectTab(tab);
-
-            return false;
-        };
-
-        self.selectTab = function(tab) {
-            if (tab != undefined) {
-                if (!_.startsWith(tab, "#")) {
-                    tab = "#" + tab;
-                }
-                $('a[href="' + tab + '"]', self.announcementDialogTabs).tab("show");
-            } else {
-                $('a:first', self.announcementDialogTabs).tab("show");
-            }
-        };
-
-        self.displayAnnouncements = function(channels) {
-            var displayLimit = self.settings.settings.plugins.announcements.display_limit();
-            var maxLength = self.settings.settings.plugins.announcements.summary_limit();
-
-            var cutAfterNewline = function(text) {
-                text = text.trim();
-
-                var firstNewlinePos = text.indexOf("\n");
-                if (firstNewlinePos > 0) {
-                    text = text.substr(0, firstNewlinePos).trim();
-                }
-
-                return text;
-            };
-
-            var stripParagraphs = function(text) {
-                if (_.startsWith(text, "<p>")) {
-                    text = text.substr("<p>".length);
-                }
-                if (_.endsWith(text, "</p>")) {
-                    text = text.substr(0, text.length - "</p>".length);
-                }
-
-                return text.replace(/<\/p>\s*<p>/ig, "<br>");
-            };
-
-            _.each(channels, function(value) {
-                var key = value.key;
-                var channel = value.channel;
-                var priority = value.priority;
-                var items = value.data;
-
-                if ($.inArray(key, self.hiddenChannels) > -1) {
-                    // channel currently ignored
-                    return;
-                }
-
-                var newItems = _.filter(items, function(entry) { return !entry.read; });
-                if (newItems.length == 0) {
-                    // no new items at all, we don't display anything for this channel
-                    return;
-                }
-
-                var displayedItems;
-                if (newItems.length > displayLimit) {
-                    displayedItems = newItems.slice(0, displayLimit);
-                } else {
-                    displayedItems = newItems;
-                }
-                var rest = newItems.length - displayedItems.length;
-
-                var text = "<ul>";
-                _.each(displayedItems, function(item) {
-                    var limitedSummary = stripParagraphs(item.summary_without_images.trim());
-                    if (limitedSummary.length > maxLength) {
-                        limitedSummary = limitedSummary.substr(0, maxLength);
-                        limitedSummary = limitedSummary.substr(0, Math.min(limitedSummary.length, limitedSummary.lastIndexOf(" ")));
-                        limitedSummary += "...";
-                    }
-
-                    text += "<li><a href='" + item.link + "' target='_blank' rel='noreferrer noopener'>" + cutAfterNewline(item.title) + "</a><br><small>" + formatTimeAgo(item.published) + "</small><p>" + limitedSummary + "</p></li>";
-                });
-                text += "</ul>";
-
-                if (rest) {
-                    text += gettext(_.sprintf("... and %(rest)d more.", {rest: rest}));
-                }
-
-                var options = {
-                    title: channel,
-                    text: text,
-                    hide: false,
-                    confirm: {
-                        confirm: true,
-                        buttons: [{
-                            text: gettext("Later"),
-                            click: function(notice) {
-                                self.hiddenChannels.push(key);
-                                notice.remove();
-                            }
-                        }, {
-                            text: gettext("Mark read"),
-                            click: function(notice) {
-                                self.markRead(key, value.last);
-                                notice.remove();
-                            }
-                        }, {
-                            text: gettext("Read..."),
-                            addClass: "btn-primary",
-                            click: function(notice) {
-                                self.showAnnouncementDialog(key);
-                                self.markRead(key, value.last);
-                                notice.remove();
-                            }
-                        }]
-                    },
-                    buttons: {
-                        sticker: false,
-                        closer: false
-                    }
-                };
-
-                if (priority == 1) {
-                    options.type = "error";
-                }
-
-                if (self.channelNotifications[key]) {
-                    self.channelNotifications[key].remove();
-                }
-                self.channelNotifications[key] = new PNotify(options);
-            });
-        };
-
-        self.onUserLoggedIn = function() {
-            self.retrieveData();
-        };
-
-        self.onStartup = function() {
-            self.announcementDialog = $("#plugin_announcements_dialog");
-            self.announcementDialogContent = $("#plugin_announcements_dialog_content");
-            self.announcementDialogTabs = $("#plugin_announcements_dialog_tabs");
-        }
-    }
-
-    // view model class, parameters for constructor, container to bind to
-    ADDITIONAL_VIEWMODELS.push([
-        AnnouncementsViewModel,
-        ["loginStateViewModel", "settingsViewModel"],
-        ["#plugin_announcements_dialog", "#settings_plugin_announcements", "#navbar_plugin_announcements"]
-    ]);
 });
 
 ;
